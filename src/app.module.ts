@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/test/user.entity';
 
 @Module({
   controllers: [],
@@ -9,7 +8,7 @@ import { User } from './modules/test/user.entity';
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
       database: process.env.DB_NAME,
-      entities: [User],
+      entities: [],
       host: process.env.DB_HOST,
       password: process.env.DB_PASSWORD,
       port: Number(process.env.DB_PORT ?? 5432),
