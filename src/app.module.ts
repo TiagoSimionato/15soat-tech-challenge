@@ -1,20 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { dataSourceConfigs } from './configs/dataSourceConfigs';
 
 @Module({
   controllers: [],
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
-      database: process.env.DB_NAME,
-      entities: [],
-      host: process.env.DB_HOST,
-      password: process.env.DB_PASSWORD,
-      port: Number(process.env.DB_PORT ?? 5432),
-      synchronize: true,
-      type: 'postgres',
-      username: process.env.DB_USER,
+      ...dataSourceConfigs,
+      entities: ['dist/**/*.entity{.ts,.js}'],
+      migrations: ['dist/**/migrations/*{.ts,.js}'],
     }),
   ],
   providers: [],

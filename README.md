@@ -1,6 +1,14 @@
-docker compose --env-file .env up -d --build
+## Running project with docker compose
 
-npx typeorm migration:create ./src/migrations/test
+```bash
+docker compose --env-file .env up -d --build
+```
+
+## Generating a new migration
+
+```bash
+npm run generate:migration --name=MIGRATION_NAME
+```
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
