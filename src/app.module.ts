@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceConfigs } from './configs/dataSourceConfigs';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   controllers: [],
@@ -12,6 +13,7 @@ import { dataSourceConfigs } from './configs/dataSourceConfigs';
       entities: ['dist/**/*.entity{.ts,.js}'],
       migrations: ['dist/**/migrations/*{.ts,.js}'],
     }),
+    UsersModule,
   ],
   providers: [],
 })
