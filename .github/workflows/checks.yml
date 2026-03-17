@@ -1,0 +1,26 @@
+name: Pull Requests Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        command: [lint, tsc]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git checkout -b main origin/main
+          git checkout -
+
+      - name: Install dependenies
+        run: npm ci
+
+      - name: Run Checks
+        run: npm run ${{ matrix.command }}
