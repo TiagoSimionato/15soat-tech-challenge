@@ -1,7 +1,12 @@
 import { lintConfig } from 'tsm-utils/lint';
 
+const newConfig = lintConfig.map(rule => ({
+  ...rule,
+  ignores: ['src/**/migrations/**'],
+}));
+
 export default [
-  ...lintConfig,
+  ...newConfig,
   {
     rules: {
       'consistent-type-imports': 'off',
