@@ -64,7 +64,7 @@ export class ResourcesController {
   }
 
   @Delete('/remove/:id')
-  async deleteUser(@Param() resourceId, @Res() res: Response) {
+  async deleteResource(@Param() resourceId, @Res() res: Response) {
     try {
       const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId.id);
       if (deleted.affected === 0)
