@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 export class Resource {
   @PrimaryGeneratedColumn()
   id: number;
-  
+
   @Column()
   name: string;
 

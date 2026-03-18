@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceConfigs } from './configs/dataSourceConfigs';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
 import { ResourcesModule } from './modules/resources/resources.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   controllers: [],
@@ -17,7 +17,7 @@ import { ResourcesModule } from './modules/resources/resources.module';
     }),
     UsersModule,
     AuthModule,
-    ResourcesModule
+    ResourcesModule,
   ],
   providers: [],
 })
