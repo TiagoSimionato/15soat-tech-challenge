@@ -11,14 +11,14 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('/sign-in')
-  signIn(@Body() request: SignInRequest) {
+  async signIn(@Body() request: SignInRequest) {
     return this.authService.signIn(request.username, request.password);
   }
 
   @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('/sign-up')
-  signUp(@Body() request: SignUpRequest) {
-    this.authService.signUp({ name: request.name, password: request.password, username: request.username });
+  async signUp(@Body() request: SignUpRequest) {
+    await this.authService.signUp(request);
   }
 }
