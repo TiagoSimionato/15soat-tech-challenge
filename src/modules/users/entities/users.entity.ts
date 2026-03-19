@@ -19,7 +19,7 @@ export class User {
   @Column()
   document: string;
 
-  @Column({ enum: LegalNature, name: 'legal_narute', type: 'enum' })
+  @Column({ enum: LegalNature, name: 'legal_nature', type: 'enum' })
   legalNature: LegalNature;
 
   @ManyToMany(() => Role)
