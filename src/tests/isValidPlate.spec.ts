@@ -1,4 +1,4 @@
-import { isValidPlate } from './isValidPlate';
+import { isValidPlate } from '../utils/isValidPlate';
 
 describe('isValidPlate', () => {
   it('should identify old standard plates', () => {
