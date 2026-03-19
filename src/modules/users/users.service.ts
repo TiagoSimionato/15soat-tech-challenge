@@ -1,8 +1,11 @@
 import type { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { isCNPJ, isCPF } from 'brazilian-values';
+import { SignUpRequest } from '../auth/requests/signUp';
 import { User } from './entities/users.entity';
+import { LegalNature } from './enums/legalNature';
 
 @Injectable()
 export class UserService {
@@ -15,11 +18,20 @@ export class UserService {
     return this.usersRepository.findOneBy({ username });
   }
 
-  async create({ name, password, username }: { name: string; password: string; username: string }) {
+  async create(signUpRequest: SignUpRequest) {
+    if (signUpRequest.legalNature === LegalNature.PF && !isCPF(signUpRequest.document)) {
+      throw new BadRequestException('document is not a valid CPF');
+    }
+    if (signUpRequest.legalNature === LegalNature.PJ && !isCNPJ(signUpRequest.document)) {
+      throw new BadRequestException('document is not a valid CNPJ');
+    }
+
     const newUser = new User();
-    newUser.name = name;
-    newUser.username = username;
-    newUser.password = await bcrypt.hash(password, 10);
+    newUser.name = signUpRequest.name;
+    newUser.username = signUpRequest.username;
+    newUser.password = await bcrypt.hash(signUpRequest.password, 10);
+    newUser.document = signUpRequest.document;
+    newUser.legalNature = signUpRequest.legalNature;
     this.usersRepository.save(newUser);
   }
 }
