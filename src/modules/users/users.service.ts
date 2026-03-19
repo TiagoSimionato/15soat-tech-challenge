@@ -32,6 +32,6 @@ export class UserService {
     newUser.password = await bcrypt.hash(signUpRequest.password, 10);
     newUser.document = signUpRequest.document;
     newUser.legalNature = signUpRequest.legalNature;
-    this.usersRepository.save(newUser);
+    await this.usersRepository.save(newUser);
   }
 }
