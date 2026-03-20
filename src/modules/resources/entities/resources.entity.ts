@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ResourceType, UnitType } from '../enums/resources.types';
 
 @Entity({ name: 'tb_resource' })
 export class Resource {
@@ -8,12 +9,12 @@ export class Resource {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ enum: ResourceType, type: 'enum' })
   type: string;
 
-  @Column()
+  @Column({type: 'numeric'})
   cost: number;
 
-  @Column()
+  @Column({ enum: UnitType, type: 'enum' })
   unit: string;
 }
