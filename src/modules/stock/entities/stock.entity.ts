@@ -9,7 +9,7 @@ export class Stock {
   @Column()
   amount: number;
 
-  @OneToOne(() => Resource)
+  @OneToOne(() => Resource, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'resource_id' })
   resource: Resource;
 }
