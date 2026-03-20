@@ -1,4 +1,5 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Vehicle } from '../../vehicle/vehicle.entity';
 import { LegalNature } from '../enums/legalNature';
 import { Role } from './roles.entity';
 
@@ -25,4 +26,7 @@ export class User {
   @ManyToMany(() => Role)
   @JoinTable({ name: 'tb_user_role' })
   roles: Role[];
+
+  @OneToMany(() => Vehicle, vehicle => vehicle.user)
+  vehicles: Vehicle[];
 }

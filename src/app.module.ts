@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ResourcesModule } from './modules/resources/resources.module';
 import { StockModule } from './modules/stock/stock.module';
 import { UsersModule } from './modules/users/users.module';
+import { VehiclesModule } from './modules/vehicle/vehicle.module';
 
 @Module({
   controllers: [],
@@ -20,6 +21,7 @@ import { UsersModule } from './modules/users/users.module';
     AuthModule,
     ResourcesModule,
     StockModule,
+    VehiclesModule,
   ],
   providers: [],
 })

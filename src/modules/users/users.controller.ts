@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Inject, NotFoundException, Param, Put } 
 import { SignUpRequest } from '../auth/requests/signUp';
 import { UserService } from './users.service';
 
-@Controller({ path: 'users' })
+@Controller('users')
 export class UsersController {
   constructor(
     @Inject()
