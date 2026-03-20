@@ -1,4 +1,4 @@
-import { isValidPlate } from '../utils/isValidPlate';
+import { isValidPlate } from '../modules/vehicle/utils/isValidPlate';
 
 describe('isValidPlate', () => {
   it('should identify old standard plates', () => {
