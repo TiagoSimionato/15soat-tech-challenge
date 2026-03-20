@@ -12,7 +12,7 @@ export class Resource {
   @Column({ enum: ResourceType, type: 'enum' })
   type: string;
 
-  @Column({type: 'numeric'})
+  @Column({ type: 'numeric' })
   cost: number;
 
   @Column({ enum: UnitType, type: 'enum' })
