@@ -1,10 +1,10 @@
 export enum ResourceType {
-  SUPPLIES = 'S',
   PARTS = 'P',
+  SUPPLIES = 'S',
 }
 
 export enum UnitType {
-  ML = 'ML',
   L = 'L',
+  ML = 'ML',
   U = 'U',
 }
