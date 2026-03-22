@@ -1,5 +1,7 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
+import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
+import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
 import { Services } from '../entities/services.entity';
@@ -13,6 +15,7 @@ export class ServicesController {
     private servicesService: ServicesService,
   ) { }
 
+  @RequireRoles([Roles.ADMIN])
   @Post('/create')
   async createService(@Body() services: ServicesDTO, @Res() res: Response) {
     try {
@@ -49,6 +52,7 @@ export class ServicesController {
     }
   }
 
+  @RequireRoles([Roles.ADMIN])
   @Put('/update/:id')
   async updateService(@Param() servicesId, @Body() services: ServicesDTO, @Res() res: Response) {
     try {
@@ -63,6 +67,7 @@ export class ServicesController {
     }
   }
 
+  @RequireRoles([Roles.ADMIN])
   @Delete('/remove/:id')
   async deleteService(@Param() servicesId, @Res() res: Response) {
     try {
