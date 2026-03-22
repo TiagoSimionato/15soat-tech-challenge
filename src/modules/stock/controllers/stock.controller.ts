@@ -1,8 +1,8 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Res } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
-import { StockDTO, StockResponse } from './models/stock.model';
-import { StockService } from './stock.service';
+import { StockDTO, StockResponse } from '../models/stock.model';
+import { StockService } from '../services/stock.service';
 
 @Controller('stock')
 export class StockController {
