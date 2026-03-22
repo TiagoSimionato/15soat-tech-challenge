@@ -1,3 +1,4 @@
+import { ServiceOrder } from '../../services/entities/serviceOrder.entity';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Vehicle } from '../../vehicle/vehicle.entity';
 import { LegalNature } from '../enums/legalNature';
@@ -29,4 +30,7 @@ export class User {
 
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
   vehicles: Vehicle[];
+
+  @OneToMany(() => ServiceOrder, serviceOrder => serviceOrder.user)
+  orders: ServiceOrder[];
 }

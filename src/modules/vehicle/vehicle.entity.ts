@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ServiceOrder } from '../services/entities/serviceOrder.entity';
 import { User } from '../users/entities/users.entity';
 
 @Entity({ name: 'tb_vehicle' })
@@ -21,4 +22,7 @@ export class Vehicle {
   @JoinColumn({ name: 'user_id' })
   @ManyToOne(() => User, user => user.vehicles, { cascade: ['remove', 'insert', 'update'], nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   user: User;
+
+  @OneToMany(() => ServiceOrder, serviceOrder => serviceOrder.vehicle)
+  serviceOrder: ServiceOrder;
 }

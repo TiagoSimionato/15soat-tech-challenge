@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { Services } from './entities/services.entity';
-import { ServicesDTO } from './models/services.model';
+import { Services } from '../entities/services.entity';
+import { ServicesDTO } from '../models/services.model';
 
 @Injectable()
 export class ServicesService {
