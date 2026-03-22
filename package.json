@@ -34,7 +34,6 @@
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "brazilian-values": "^0.13.1",
-    "cross-var": "^1.1.0",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
