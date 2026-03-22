@@ -16,7 +16,7 @@ export class UserService {
   ) {}
 
   async findOne(username: string): Promise<null | User> {
-    return await this.usersRepository.findOneBy({ username });
+    return await this.usersRepository.findOne({ relations: ['roles'], where: { username } });
   }
 
   async create(signUpRequest: SignUpRequest) {
