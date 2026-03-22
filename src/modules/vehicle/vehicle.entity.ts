@@ -24,5 +24,5 @@ export class Vehicle {
   user: User;
 
   @OneToMany(() => ServiceOrder, serviceOrder => serviceOrder.vehicle)
-  serviceOrder: ServiceOrder;
+  serviceOrder: ServiceOrder[];
 }
