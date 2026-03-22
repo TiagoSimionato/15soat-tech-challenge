@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, NotFoundException, Param, Put } from '@nestjs/common';
-import { SignUpRequest } from '../auth/requests/signUp';
-import { UserService } from './users.service';
+import { SignUpRequest } from '../../auth/requests/signUp';
+import { UserService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {
@@ -9,12 +9,12 @@ export class UsersController {
     private userService: UserService,
   ) {}
 
-  @Get('/list')
+  @Get()
   async listAllUsers() {
     return await this.userService.listUsers();
   }
 
-  @Get('/list/:id')
+  @Get(':id')
   async listOneUser(@Param() { id }) {
     const user = await this.userService.listOneUser(id);
     if (!user) {
@@ -23,7 +23,7 @@ export class UsersController {
     return user;
   }
 
-  @Put('/update/:id')
+  @Put(':id')
   async updateUser(@Param() { id }, @Body() request: SignUpRequest) {
     const updateResult = await this.userService.updateUser(id, request);
     if (updateResult.affected === 0) {
@@ -31,7 +31,7 @@ export class UsersController {
     }
   }
 
-  @Delete('/remove/:id')
+  @Delete(':id')
   async deleteUser(@Param() { id }) {
     const deleteResult = await this.userService.deleteUser(id);
     if (deleteResult.affected === 0) {

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { Stock } from './entities/stock.entity';
-import { StockDTO, StockResponse } from './models/stock.model';
-import { stockResponseFormatter } from './utils/stockResponse.helper';
+import { Stock } from '../entities/stock.entity';
+import { StockDTO, StockResponse } from '../models/stock.model';
+import { stockResponseFormatter } from '../utils/stockResponse.helper';
 
 @Injectable()
 export class StockService {

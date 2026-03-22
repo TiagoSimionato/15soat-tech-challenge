@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { Resource } from './entities/resources.entity';
-import { ResourcesByService } from './entities/resourcesByService.entity';
-import { ResourceDTO } from './models/resource.model';
+import { Resource } from '../entities/resources.entity';
+import { ResourceDTO } from '../models/resource.model';
 
 @Injectable()
 export class ResourceService {

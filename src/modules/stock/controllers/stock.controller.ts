@@ -1,17 +1,17 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Res } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
-import { StockDTO, StockResponse } from './models/stock.model';
-import { StockService } from './stock.service';
+import { StockDTO, StockResponse } from '../models/stock.model';
+import { StockService } from '../services/stock.service';
 
-@Controller('stock')
+@Controller('stocks')
 export class StockController {
   constructor(
     @Inject()
     private stockService: StockService,
   ) { }
 
-  @Post('/create')
+  @Post()
   async createResource(@Body() stock: StockDTO, @Res() res: Response) {
     try {
       await this.stockService.createStock(stock);
@@ -22,7 +22,7 @@ export class StockController {
     }
   }
 
-  @Get('/list')
+  @Get()
   async listAllStocks(@Res() res: Response) {
     try {
       const arrStocks: StockResponse[] = await this.stockService.listStocks();
@@ -33,7 +33,7 @@ export class StockController {
     }
   }
 
-  @Get('/list/resource/:id')
+  @Get('/resource/:id')
   async listStockByResourceId(@Param() resourceId, @Res() res: Response) {
     try {
       const stock: null | StockResponse = await this.stockService.listStockByResourceId(resourceId.id);
@@ -47,7 +47,7 @@ export class StockController {
     }
   }
 
-  @Delete('/remove/:id')
+  @Delete(':id')
   async deleteStock(@Param() stockId, @Res() res: Response) {
     try {
       const deleted: DeleteResult = await this.stockService.deleteStock(stockId.id);
