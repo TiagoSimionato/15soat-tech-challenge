@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
 import { Resource } from '../entities/resources.entity';
+import { ResourcesByService } from '../entities/resourcesByService.entity';
 import { ResourceDTO } from '../models/resource.model';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class ResourceService {
   constructor(
     @InjectRepository(Resource)
     private readonly resourceRepository: Repository<Resource>,
+    @InjectRepository(ResourcesByService)
     private readonly resourceByServiceRepository: Repository<ResourcesByService>,
   ) { }
 
@@ -42,7 +44,14 @@ export class ResourceService {
   }
 
   async listResourcesOfAService(serviceId: number) {
-    return await this.resourceByServiceRepository.findBy({ service: { id: serviceId } });
+    return await this.resourceByServiceRepository.find({
+      relations: ['resource'],
+      where: {
+        service: {
+          id: serviceId,
+        },
+      },
+    });
   }
 
   async listOneResource(id: number): Promise<null | Resource> {
@@ -55,11 +64,15 @@ export class ResourceService {
     return await this.resourceRepository.update({ id }, resource);
   }
 
-  async updateResourceQuantityOfAService() {
-
+  async updateResourceQuantityOfAService(resourceServiceId: number, min_quantity: number): Promise<UpdateResult> {
+    return await this.resourceByServiceRepository.update({ id: resourceServiceId }, { min_quantity });
   }
 
   async deleteResource(id: number): Promise<DeleteResult> {
     return await this.resourceRepository.delete({ id });
+  }
+
+  async deleteResourceOfAService(resourceServiceId: number): Promise<DeleteResult> {
+    return await this.resourceByServiceRepository.delete({ id: resourceServiceId });
   }
 }
