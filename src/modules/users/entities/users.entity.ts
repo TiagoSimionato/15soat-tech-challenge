@@ -25,7 +25,7 @@ export class User {
   legalNature: LegalNature;
 
   @ManyToMany(() => Role)
-  @JoinTable({ name: 'tb_user_role' })
+  @JoinTable({ inverseJoinColumn: { name: 'role_id' }, joinColumn: { name: 'user_id' }, name: 'tb_user_role' })
   roles: Role[];
 
   @OneToMany(() => Vehicle, vehicle => vehicle.user)
