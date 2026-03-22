@@ -6,14 +6,14 @@ import { Resource } from '../entities/resources.entity';
 import { ResourceDTO } from '../models/resource.model';
 import { ResourceService } from '../services/resources.service';
 
-@Controller('resource')
+@Controller('resources')
 export class ResourcesController {
   constructor(
     @Inject()
     private resourceService: ResourceService,
   ) { }
 
-  @Post('/create')
+  @Post()
   async createResource(@Body() resource: ResourceDTO, @Res() res: Response) {
     try {
       await this.resourceService.createResource(resource);
@@ -24,7 +24,7 @@ export class ResourcesController {
     }
   }
 
-  @Get('/list')
+  @Get()
   async listAllResources(@Res() res: Response) {
     try {
       const arrResources: Resource[] = await this.resourceService.listResources();
@@ -35,7 +35,7 @@ export class ResourcesController {
     }
   }
 
-  @Get('/list/:id')
+  @Get(':id')
   async listOneResource(@Param() resourceId, @Res() res: Response) {
     try {
       const resource: null | Resource = await this.resourceService.listOneResource(resourceId.id);
@@ -49,7 +49,7 @@ export class ResourcesController {
     }
   }
 
-  @Put('/update/:id')
+  @Put(':id')
   async updateResource(@Param() resourceId, @Body() resource: ResourceDTO, @Res() res: Response) {
     try {
       const update: UpdateResult = await this.resourceService.updateResource(resourceId.id, resource);
@@ -63,7 +63,7 @@ export class ResourcesController {
     }
   }
 
-  @Delete('/remove/:id')
+  @Delete(':id')
   async deleteResource(@Param() resourceId, @Res() res: Response) {
     try {
       const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId.id);

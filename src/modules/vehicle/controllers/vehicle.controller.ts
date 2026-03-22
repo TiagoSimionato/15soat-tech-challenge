@@ -7,22 +7,22 @@ import { VehicleService } from '../services/vehicle.service';
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
-  @Post('/create')
+  @Post()
   async create(@Body() createVehicleDto: VehicleDTO, @CurrentUserId() userId: number) {
     return await this.vehicleService.create(createVehicleDto, userId);
   }
 
-  @Get('/list')
+  @Get()
   async listAll(@CurrentUserId() userId: number) {
     return await this.vehicleService.findAllUserVehicles(userId);
   }
 
-  @Get('/list/:id')
+  @Get(':id')
   async listOne(@Param('id', ParseIntPipe) id: number, @CurrentUserId() userId: number) {
     return await this.vehicleService.findOneUserVehicle(id, userId);
   }
 
-  @Put('/update/:id')
+  @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: VehicleDTO,
@@ -31,7 +31,7 @@ export class VehicleController {
     return await this.vehicleService.update(id, updateVehicleDto, userId);
   }
 
-  @Delete('/remove/:id')
+  @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUserId() userId: number) {
     return await this.vehicleService.remove(id, userId);
   }
