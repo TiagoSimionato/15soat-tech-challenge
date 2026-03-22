@@ -2,9 +2,9 @@ import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { Services } from './entities/services.entity';
-import { ServicesDTO } from './models/services.model';
-import { ServicesService } from './services.service';
+import { Services } from '../entities/services.entity';
+import { ServicesDTO } from '../models/services.model';
+import { ServicesService } from '../services/services.service';
 
 @Controller('services')
 export class ServicesController {

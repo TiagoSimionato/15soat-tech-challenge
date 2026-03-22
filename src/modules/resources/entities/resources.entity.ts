@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ResourcesByService } from '../../services/entities/resourcesByService.entity';
 import { ResourceType, UnitType } from '../enums/resources.types';
 
 @Entity({ name: 'tb_resource' })
@@ -17,4 +18,7 @@ export class Resource {
 
   @Column({ enum: UnitType, type: 'enum' })
   unit: string;
+
+  @OneToMany(() => ResourcesByService, services => services.resource)
+  services: ResourcesByService[];
 }
