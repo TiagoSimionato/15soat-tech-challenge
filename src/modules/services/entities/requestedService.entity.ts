@@ -29,5 +29,5 @@ export class RequestedService {
   serviceOrder: ServiceOrder;
 
   @OneToMany(() => ServiceItem, item => item.requestedService)
-  serviceItem: ServiceItem;
+  serviceItem: ServiceItem[];
 }
