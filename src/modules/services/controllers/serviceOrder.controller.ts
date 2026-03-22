@@ -1,11 +1,7 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
-import { UpdateResult } from 'typeorm';
-import { DeleteResult } from 'typeorm/browser';
-import { Services } from '../entities/services.entity';
-import { ServicesDTO } from '../models/services.model';
-import { ServiceOrderService } from '../services/serviceOrder.service';
+import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
 import { ServiceOrderDTO } from '../models/serviceOrder.model';
+import { ServiceOrderService } from '../services/serviceOrder.service';
 
 @Controller('services/order')
 export class ServiceOrderController {

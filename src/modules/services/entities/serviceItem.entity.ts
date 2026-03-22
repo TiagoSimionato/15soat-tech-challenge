@@ -1,5 +1,5 @@
-import { Stock } from '../../stock/entities/stock.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Stock } from '../../stock/entities/stock.entity';
 import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_item' })

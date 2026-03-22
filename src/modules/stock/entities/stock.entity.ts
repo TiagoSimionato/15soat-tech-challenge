@@ -1,6 +1,6 @@
-import { ServiceItem } from '../../services/entities/serviceItem.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Resource } from '../../resources/entities/resources.entity';
+import { ServiceItem } from '../../services/entities/serviceItem.entity';
 
 @Entity({ name: 'tb_stock' })
 export class Stock {

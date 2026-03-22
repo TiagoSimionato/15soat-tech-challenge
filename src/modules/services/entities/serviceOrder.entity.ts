@@ -1,8 +1,8 @@
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
 import { Vehicle } from '../../vehicle/vehicle.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { RequestedService } from './requestedService.entity';
 import { ServiceOrderStatus } from '../enums/services.types';
+import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_order' })
 export class ServiceOrder {

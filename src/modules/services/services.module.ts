@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Services } from './entities/services.entity';
-import { ServicesController } from './controllers/services.controller';
-import { ServicesService } from './services/services.service';
-import { ServiceOrderService } from './services/serviceOrder.service';
 import { ServiceOrderController } from './controllers/serviceOrder.controller';
+import { ServicesController } from './controllers/services.controller';
 import { ServiceOrder } from './entities/serviceOrder.entity';
+import { Services } from './entities/services.entity';
+import { ServiceOrderService } from './services/serviceOrder.service';
+import { ServicesService } from './services/services.service';
 
 @Module({
   controllers: [ServicesController, ServiceOrderController],
