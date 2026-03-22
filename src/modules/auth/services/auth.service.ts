@@ -20,6 +20,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     const payload = {
+      roles: user.roles.map(it => it.authority),
       sub: user.id,
       username: user.username,
     };
