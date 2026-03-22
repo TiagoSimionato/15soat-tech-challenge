@@ -2,9 +2,9 @@ import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { Resource } from './entities/resources.entity';
-import { ResourceDTO } from './models/resource.model';
-import { ResourceService } from './resources.service';
+import { Resource } from '../entities/resources.entity';
+import { ResourceDTO } from '../models/resource.model';
+import { ResourceService } from '../services/resources.service';
 
 @Controller('resource')
 export class ResourcesController {
