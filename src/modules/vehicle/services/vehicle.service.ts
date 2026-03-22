@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { isValidPlate } from 'src/modules/vehicle/utils/isValidPlate';
 import { Repository } from 'typeorm';
-import { VehicleDTO } from './models/vehicle.model';
-import { Vehicle } from './vehicle.entity';
+import { Vehicle } from '../entities/vehicle.entity';
+import { VehicleDTO } from '../models/vehicle.model';
 
 const INVALID_PLATE_MESSAGE = 'Invalid Plate';
 

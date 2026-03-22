@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import { CurrentUserId } from '../auth/decorators/current-user';
-import { VehicleDTO } from './models/vehicle.model';
-import { VehicleService } from './vehicle.service';
+import { CurrentUserId } from '../../auth/decorators/current-user';
+import { VehicleDTO } from '../models/vehicle.model';
+import { VehicleService } from '../services/vehicle.service';
 
 @Controller('vehicles')
 export class VehicleController {

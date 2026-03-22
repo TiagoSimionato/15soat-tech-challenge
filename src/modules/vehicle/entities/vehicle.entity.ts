@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ServiceOrder } from '../services/entities/serviceOrder.entity';
-import { User } from '../users/entities/users.entity';
+import { ServiceOrder } from '../../services/entities/serviceOrder.entity';
+import { User } from '../../users/entities/users.entity';
 
 @Entity({ name: 'tb_vehicle' })
 export class Vehicle {

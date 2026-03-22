@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ServiceOrder } from '../../services/entities/serviceOrder.entity';
-import { Vehicle } from '../../vehicle/vehicle.entity';
+import { Vehicle } from '../../vehicle/entities/vehicle.entity';
 import { LegalNature } from '../enums/legalNature';
 import { Role } from './roles.entity';
 
