@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, NotFoundException, Param, Put } from '@nestjs/common';
-import { SignUpRequest } from '../auth/requests/signUp';
-import { UserService } from './users.service';
+import { SignUpRequest } from '../../auth/requests/signUp';
+import { UserService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {
