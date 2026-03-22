@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { StockController } from './controllers/stock.controller';
 import { Stock } from './entities/stock.entity';
-import { StockController } from './stock.controller';
-import { StockService } from './stock.service';
+import { StockService } from './services/stock.service';
 
 @Module({
   controllers: [StockController],

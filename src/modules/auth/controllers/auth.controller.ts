@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { Public } from './decorators/public';
-import { SignInRequest } from './requests/signIn';
-import { SignUpRequest } from './requests/signUp';
+import { Public } from '../decorators/public';
+import { SignInRequest } from '../requests/signIn';
+import { SignUpRequest } from '../requests/signUp';
+import { AuthService } from '../services/auth.service';
 
 @Controller({ path: 'auth' })
 export class AuthController {

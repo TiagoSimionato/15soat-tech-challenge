@@ -3,10 +3,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { isCNPJ, isCPF } from 'brazilian-values';
-import { SignUpRequest } from '../auth/requests/signUp';
-import { User } from './entities/users.entity';
-import { LegalNature } from './enums/legalNature';
-import { UserResponseDTO } from './models/UserResponseDTO';
+import { SignUpRequest } from '../../auth/requests/signUp';
+import { User } from '../entities/users.entity';
+import { LegalNature } from '../enums/legalNature';
+import { UserResponseDTO } from '../models/UserResponseDTO';
 
 @Injectable()
 export class UserService {
