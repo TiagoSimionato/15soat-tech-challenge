@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
 import { RequestedService } from './requestedService.entity';
-import { ResourcesByService } from './resourcesByService.entity';
 
 @Entity({ name: 'tb_services' })
 export class Services {
