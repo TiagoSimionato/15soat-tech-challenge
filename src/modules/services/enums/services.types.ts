@@ -3,3 +3,12 @@ export enum ServiceOrderStatus {
   CANCELED = 'CANCELED',
   PENDING = 'PENDING',
 }
+
+export enum RequestedServicesStatus {
+  AGUARDANDO_APROVACAO = 'AGUARDANDO APROVAÇÃO',
+  EM_DIAGNOSTICO = 'EM DIAGNÓSTICO',
+  EM_EXECUCAO = 'EM EXECUÇÃO',
+  ENTREGUE = 'ENTEGUE',
+  FINALIZADA = 'FINALIZADA',
+  RECEBIDA = 'RECEBIDA',
+}

@@ -11,7 +11,7 @@ export class ServiceItem {
   amount: number;
 
   @ManyToOne(() => Stock, stock => stock.serviceItem)
-  @JoinColumn({ name: 'stock_id' })
+  @JoinColumn({ name: 'stockId' })
   stock: Stock;
 
   @ManyToOne(() => RequestedService, requestedService => requestedService.serviceItem)

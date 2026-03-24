@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ServiceItem } from './serviceItem.entity';
 import { ServiceOrder } from './serviceOrder.entity';
 import { Services } from './services.entity';
@@ -11,16 +11,16 @@ export class RequestedService {
   @Column()
   status: string;
 
-  @Column()
+  @Column({ nullable: true })
   started_at: Date;
 
-  @Column()
+  @Column({ nullable: true })
   finished_at: Date;
 
   @Column({ type: 'numeric' })
   cost: number;
 
-  @OneToOne(() => Services, services => services.requestedService)
+  @ManyToOne(() => Services, services => services.requestedService)
   @JoinColumn({ name: 'service_id' })
   service: Services;
 

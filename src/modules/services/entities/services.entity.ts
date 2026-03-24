@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
 import { RequestedService } from './requestedService.entity';
 
@@ -13,7 +13,7 @@ export class Services {
   @Column({ type: 'numeric' })
   cost: number;
 
-  @OneToOne(() => RequestedService, requestedService => requestedService.service)
+  @OneToMany(() => RequestedService, requestedService => requestedService.service)
   requestedService: RequestedService;
 
   @OneToMany(() => ResourcesByService, resources => resources.resource)
