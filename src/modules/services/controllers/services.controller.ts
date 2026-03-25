@@ -16,7 +16,7 @@ export class ServicesController {
   ) { }
 
   @RequireRoles([Roles.ADMIN])
-  @Post('/create')
+  @Post()
   async createService(@Body() services: ServicesDTO, @Res() res: Response) {
     try {
       await this.servicesService.createService(services);
@@ -27,7 +27,7 @@ export class ServicesController {
     }
   }
 
-  @Get('/list')
+  @Get()
   async listAllServices(@Res() res: Response) {
     try {
       const arrServicess: Services[] = await this.servicesService.listServices();
@@ -38,7 +38,7 @@ export class ServicesController {
     }
   }
 
-  @Get('/list/:id')
+  @Get('/:id')
   async listOneService(@Param() serviceId, @Res() res: Response) {
     try {
       const services: null | Services = await this.servicesService.listOneService(serviceId.id);
@@ -53,7 +53,7 @@ export class ServicesController {
   }
 
   @RequireRoles([Roles.ADMIN])
-  @Put('/update/:id')
+  @Put('/:id')
   async updateService(@Param() servicesId, @Body() services: ServicesDTO, @Res() res: Response) {
     try {
       const update: UpdateResult = await this.servicesService.updateService(servicesId.id, services);
@@ -68,7 +68,7 @@ export class ServicesController {
   }
 
   @RequireRoles([Roles.ADMIN])
-  @Delete('/remove/:id')
+  @Delete('/:id')
   async deleteService(@Param() servicesId, @Res() res: Response) {
     try {
       const deleted: DeleteResult = await this.servicesService.deleteService(servicesId.id);

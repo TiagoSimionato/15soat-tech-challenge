@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, EntityManager, Repository } from 'typeorm';
 import { Stock } from '../entities/stock.entity';
 import { StockDTO, StockResponse } from '../models/stock.model';
 import { stockResponseFormatter } from '../utils/stockResponse.helper';
@@ -31,13 +31,27 @@ export class StockService {
     return formattedStock;
   }
 
-  async listStockByResourceId(resourceId: number): Promise<null | StockResponse> {
-    const stock: null | Stock = await this.stockRepository.findOne({
+  async listStockByResourceId(resourceId: number, manager?: EntityManager): Promise<null | StockResponse> {
+    const repo = manager ? manager.getRepository(Stock) : this.stockRepository;
+
+    const stock: null | Stock = await repo.findOne({
       relations: ['resource'],
       where: {
         resource: {
           id: resourceId,
         },
+      },
+    });
+
+    return stock ? stockResponseFormatter(stock) : null;
+  }
+
+  async listStockByStockId(id: number, manager?: EntityManager): Promise<null | StockResponse> {
+    const repo = manager ? manager.getRepository(Stock) : this.stockRepository;
+    const stock: null | Stock = await repo.findOne({
+      relations: ['resource'],
+      where: {
+        id,
       },
     });
 

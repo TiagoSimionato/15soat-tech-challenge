@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
-import { Resource } from '../../resources/entities/resources.entity';
-import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
-import { Stock } from '../../stock/entities/stock.entity';
-import { RequestedService } from '../entities/requestedService.entity';
-import { ServiceItem } from '../entities/serviceItem.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
-import { Services } from '../entities/services.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../enums/services.types';
-import { ServiceOrderDTO, ServiceOrderServiceDTO } from '../models/serviceOrder.model';
+import { ServiceOrderStatus } from '../enums/services.types';
+import { ServiceOrderDTO } from '../models/serviceOrder.model';
+import { RequestedServiceService } from './requestedService.service';
 
 @Injectable()
 export class ServiceOrderService {
   constructor(
+    @InjectRepository(ServiceOrder)
+    private readonly serviceOrderRepository: Repository<ServiceOrder>,
     private readonly dataSource: DataSource,
+    private readonly requestedServiceS: RequestedServiceService,
   ) { }
 
   async createServiceOrder(serviceOrder: ServiceOrderDTO) {
@@ -31,96 +30,15 @@ export class ServiceOrderService {
       });
 
       const serviceOrderId: number = (await manager.save(dbServiceOrder)).id;
-      await this.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
+      await this.requestedServiceS.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
     });
   }
 
-  private async createRequestedServiceOrder(manager: EntityManager, serviceOrderId: number, arrServices: ServiceOrderServiceDTO[]) {
-    for (const i in arrServices) {
-      const cost: number = await this.calculateRequestedServiceCost(manager, arrServices[i].id);
-      const dbReqServiceOrder = manager.create(RequestedService, {
-        cost,
-        service: {
-          id: arrServices[i].id,
-        },
-        serviceOrder: {
-          id: serviceOrderId,
-        },
-        status: RequestedServicesStatus.RECEBIDA,
-      });
-
-      const requestedServiceId: number = (await manager.save(dbReqServiceOrder)).id;
-      await this.createServiceItems(manager, requestedServiceId, arrServices[i].id);
-    }
+  async getOrders(): Promise<null | ServiceOrder[]> {
+    return await this.serviceOrderRepository.find({ relations: ['vehicle', 'user', 'requestedService'] });
   }
 
-  private async getResourcesByServiceId(manager: EntityManager, serviceId: number): Promise<ResourcesByService[]> {
-    return await manager.find(ResourcesByService, {
-      relations: ['resource'],
-      where: {
-        service: {
-          id: serviceId,
-        },
-      },
-    });
-  }
-
-  private async getStockByResourceId(manager: EntityManager, resourceId: number): Promise<null | Stock> {
-    return await manager.findOneBy(Stock, {
-      resource: {
-        id: resourceId,
-      },
-    });
-  }
-
-  private async createServiceItems(manager: EntityManager, requestedServiceId: number, serviceId: number) {
-    const resourcesByService: ResourcesByService[] = await this.getResourcesByServiceId(manager, serviceId);
-
-    for (const i in resourcesByService) {
-      const stock: null | Stock = await this.getStockByResourceId(manager, resourcesByService[i].resource.id);
-
-      if (!stock) {
-        throw new Error(
-          `Estoque não encontrado para o recurso ${resourcesByService[i].resource.id}`,
-        );
-      }
-
-      const dbServiceItem = manager.create(ServiceItem, {
-        amount: resourcesByService[i].min_quantity,
-        requestedService: {
-          id: requestedServiceId,
-        },
-        stock: {
-          id: stock.id,
-        },
-      });
-
-      await manager.save(dbServiceItem);
-    }
-  }
-
-  private async getResourceDetail(manager: EntityManager, resourceId: number): Promise<null | Resource> {
-    return await manager.findOneBy(Resource, {
-      id: resourceId,
-    });
-  }
-
-  private async getServiceDetail(manager: EntityManager, serviceId: number): Promise<null | Services> {
-    return await manager.findOneBy(Services, {
-      id: serviceId,
-    });
-  }
-
-  private async calculateRequestedServiceCost(manager: EntityManager, serviceId: number): Promise<number> {
-    const resources: ResourcesByService[] = await this.getResourcesByServiceId(manager, serviceId);
-    const service: null | Services = await this.getServiceDetail(manager, serviceId);
-    const serviceCost: number = service ? service.cost : 0;
-    let totalCost: number = Number(serviceCost);
-
-    for (const i in resources) {
-      const resource: null | Resource = await this.getResourceDetail(manager, resources[i].resource.id);
-      totalCost += resource ? Number(resource.cost) * Number(resources[i].min_quantity) : 0;
-    }
-    return totalCost;
+  async getOrderDetail(id: number): Promise<null | ServiceOrder> {
+    return await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedService'], where: { id } });
   }
 }
