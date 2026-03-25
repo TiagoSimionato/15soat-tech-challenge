@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { EntityManager, Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
 import { Resource } from '../entities/resources.entity';
 import { ResourcesByService } from '../entities/resourcesByService.entity';
@@ -43,8 +43,10 @@ export class ResourceService {
     return await this.resourceRepository.find();
   }
 
-  async listResourcesOfAService(serviceId: number) {
-    return await this.resourceByServiceRepository.find({
+  async listResourcesOfAService(serviceId: number, manager?: EntityManager): Promise<ResourcesByService[]> {
+    const repo = manager ? manager.getRepository(ResourcesByService) : this.resourceByServiceRepository;
+
+    return await repo.find({
       relations: ['resource'],
       where: {
         service: {
@@ -54,8 +56,9 @@ export class ResourceService {
     });
   }
 
-  async listOneResource(id: number): Promise<null | Resource> {
-    return await this.resourceRepository.findOneBy({
+  async listOneResource(id: number, manager?: EntityManager): Promise<null | Resource> {
+    const repo = manager ? manager.getRepository(Resource) : this.resourceRepository;
+    return await repo.findOneBy({
       id,
     });
   }

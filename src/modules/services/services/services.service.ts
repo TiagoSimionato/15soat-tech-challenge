@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { EntityManager, Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
 import { Services } from '../entities/services.entity';
 import { ServicesDTO } from '../models/services.model';
@@ -21,10 +21,9 @@ export class ServicesService {
     return await this.servicesRepository.find();
   }
 
-  async listOneService(id: number): Promise<null | Services> {
-    return await this.servicesRepository.findOneBy({
-      id,
-    });
+  async listOneService(id: number, manager?: EntityManager): Promise<null | Services> {
+    const repo = manager ? manager.getRepository(Services) : this.servicesRepository;
+    return await repo.findOne({ where: { id } });
   }
 
   async updateService(id: number, service: ServicesDTO): Promise<UpdateResult> {

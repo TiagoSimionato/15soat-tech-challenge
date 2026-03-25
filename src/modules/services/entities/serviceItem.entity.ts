@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { Stock } from '../../stock/entities/stock.entity';
 import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_item' })
+@Unique(['stock', 'requestedService'])
 export class ServiceItem {
   @PrimaryGeneratedColumn()
   id: number;
