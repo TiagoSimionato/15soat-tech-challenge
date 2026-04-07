@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { CurrentUserId } from '../../auth/decorators/current-user';
 import { VehicleDTO } from '../models/vehicle.model';
 import { VehicleService } from '../services/vehicle.service';
@@ -17,22 +17,22 @@ export class VehicleController {
     return await this.vehicleService.findAllUserVehicles(userId);
   }
 
-  @Get(':id')
-  async listOne(@Param('id', ParseIntPipe) id: number, @CurrentUserId() userId: number) {
-    return await this.vehicleService.findOneUserVehicle(id, userId);
+  @Get(':plate')
+  async listOne(@Param('plate') plate: string, @CurrentUserId() userId: number) {
+    return await this.vehicleService.findOneUserVehicle(plate, userId);
   }
 
-  @Put(':id')
+  @Put(':plate')
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('plate') plate: string,
     @Body() updateVehicleDto: VehicleDTO,
     @CurrentUserId() userId: number,
   ) {
-    return await this.vehicleService.update(id, updateVehicleDto, userId);
+    return await this.vehicleService.update(plate, updateVehicleDto, userId);
   }
 
-  @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number, @CurrentUserId() userId: number) {
-    return await this.vehicleService.remove(id, userId);
+  @Delete(':plate')
+  async remove(@Param('plate') plate: string, @CurrentUserId() userId: number) {
+    return await this.vehicleService.remove(plate, userId);
   }
 }

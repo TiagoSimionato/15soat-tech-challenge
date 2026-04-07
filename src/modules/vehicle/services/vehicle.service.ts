@@ -33,20 +33,22 @@ export class VehicleService {
     return await this.vehicleRepository.find({ relations: ['user'], where: { user: { id: userId } } });
   }
 
-  async findOneUserVehicle(id: number, userId: number) {
-    const vehicle = await this.vehicleRepository.findOne({ relations: ['user'], where: { id, user: { id: userId } } });
+  async findOneUserVehicle(plate: string, userId: number) {
+    plate = plate.toUpperCase();
+    const vehicle = await this.vehicleRepository.findOne({ relations: ['user'], where: { plate, user: { id: userId } } });
     if (!vehicle) {
       throw new NotFoundException();
     }
     return vehicle;
   }
 
-  async update(id: number, dto: VehicleDTO, userId: number) {
+  async update(plate: string, dto: VehicleDTO, userId: number) {
+    plate = plate.toUpperCase();
     if (!isValidPlate(dto.plate)) {
       throw new BadRequestException(INVALID_PLATE_MESSAGE);
     }
 
-    const vehicle = await this.findOneUserVehicle(id, userId);
+    const vehicle = await this.findOneUserVehicle(plate, userId);
     if (dto.year) {
       vehicle.year = dto.year;
     }
@@ -63,11 +65,12 @@ export class VehicleService {
     return await this.vehicleRepository.save(vehicle);
   }
 
-  async remove(id: number, userId: number) {
-    if (!(await this.findOneUserVehicle(id, userId))) {
+  async remove(plate: string, userId: number) {
+    plate = plate.toUpperCase();
+    if (!(await this.findOneUserVehicle(plate, userId))) {
       throw new NotFoundException();
     }
-    const result = await this.vehicleRepository.delete(id);
+    const result = await this.vehicleRepository.delete({ plate });
     if (result.affected === 0) {
       throw new NotFoundException();
     }
