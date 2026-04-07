@@ -10,6 +10,20 @@ docker compose --env-file .env up -d --build
 npm run generate:migration --name=MIGRATION_NAME
 ```
 
+## Development
+
+Install dependencies with
+
+```bash
+npm install
+```
+
+Then start the dev server with
+
+```bash
+npm run dev
+```
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
