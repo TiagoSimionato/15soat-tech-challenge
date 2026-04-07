@@ -18,7 +18,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ unique: true })
   document: string;
 
   @Column({ enum: LegalNature, name: 'legal_nature', type: 'enum' })
