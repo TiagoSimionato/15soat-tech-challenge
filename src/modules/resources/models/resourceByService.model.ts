@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 
 export class ResourceByServiceDTO {
-  @IsNotEmpty() @IsNumber() min_quantity: number;
+  @IsNotEmpty() @IsInt() min_quantity: number;
 }
