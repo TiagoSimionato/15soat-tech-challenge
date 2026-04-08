@@ -1,8 +1,8 @@
-import { IsNumber } from 'class-validator';
+import { IsInt } from 'class-validator';
 
 export class StockDTO {
-  @IsNumber() amount: number;
-  @IsNumber() resource_id: number;
+  @IsInt() amount: number;
+  @IsInt() resource_id: number;
 }
 
 export class StockResponse {

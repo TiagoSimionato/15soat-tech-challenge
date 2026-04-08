@@ -1,6 +1,10 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class ServicesDTO {
-  @IsString() name: string;
-  @IsNumber() cost: number;
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  cost: number;
 }

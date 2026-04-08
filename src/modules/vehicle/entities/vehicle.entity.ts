@@ -16,7 +16,7 @@ export class Vehicle {
   @Column()
   model: string;
 
-  @Column()
+  @Column({ unique: true })
   plate: string;
 
   @JoinColumn({ name: 'user_id' })

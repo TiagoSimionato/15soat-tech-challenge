@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class VehicleDTO {
-  @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
   year: number;
 
   @IsNotEmpty()
@@ -15,5 +15,6 @@ export class VehicleDTO {
 
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value?.toUpperCase())
   plate: string;
 }

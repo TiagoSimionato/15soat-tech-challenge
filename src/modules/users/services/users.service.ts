@@ -41,21 +41,21 @@ export class UserService {
     return (await this.usersRepository.find()).map(user => new UserResponseDTO({ ...user }));
   }
 
-  async listOneUser(id: number): Promise<null | UserResponseDTO> {
-    const userEntity = await this.usersRepository.findOneBy({ id });
+  async listOneUser(document: string): Promise<null | UserResponseDTO> {
+    const userEntity = await this.usersRepository.findOneBy({ document });
     if (!userEntity)
       return null;
 
     return new UserResponseDTO({ ...userEntity });
   }
 
-  async updateUser(id: number, user: SignUpRequest): Promise<UpdateResult> {
+  async updateUser(document: string, user: SignUpRequest): Promise<UpdateResult> {
     user.password = await this.encryptPassword(user.password);
-    return await this.usersRepository.update({ id }, user);
+    return await this.usersRepository.update({ document }, user);
   }
 
-  async deleteUser(id: number): Promise<DeleteResult> {
-    return await this.usersRepository.delete({ id });
+  async deleteUser(document: string): Promise<DeleteResult> {
+    return await this.usersRepository.delete({ document });
   }
 
   private async encryptPassword(password: string) {

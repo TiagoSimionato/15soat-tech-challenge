@@ -17,26 +17,26 @@ export class UsersController {
     return await this.userService.listUsers();
   }
 
-  @Get(':id')
-  async listOneUser(@Param() { id }) {
-    const user = await this.userService.listOneUser(id);
+  @Get(':document')
+  async listOneUser(@Param() { document }) {
+    const user = await this.userService.listOneUser(document);
     if (!user) {
       throw new NotFoundException();
     }
     return user;
   }
 
-  @Put(':id')
-  async updateUser(@Param() { id }, @Body() request: SignUpRequest) {
-    const updateResult = await this.userService.updateUser(id, request);
+  @Put(':document')
+  async updateUser(@Param() { document }, @Body() request: SignUpRequest) {
+    const updateResult = await this.userService.updateUser(document, request);
     if (updateResult.affected === 0) {
       throw new NotFoundException();
     }
   }
 
-  @Delete(':id')
-  async deleteUser(@Param() { id }) {
-    const deleteResult = await this.userService.deleteUser(id);
+  @Delete(':document')
+  async deleteUser(@Param() { document }) {
+    const deleteResult = await this.userService.deleteUser(document);
     if (deleteResult.affected === 0) {
       throw new NotFoundException();
     }
