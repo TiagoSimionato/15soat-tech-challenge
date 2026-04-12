@@ -14,8 +14,8 @@ import { ServiceOrderService } from '../services/serviceOrder.service';
 export class ServiceOrderController {
   constructor(
     @Inject()
-    private serviceOrderService: ServiceOrderService,
-    private requestedServiceS: RequestedServiceService,
+    private readonly serviceOrderService: ServiceOrderService,
+    private readonly requestedServiceS: RequestedServiceService,
   ) { }
 
   @RequireRoles([Roles.ADMIN])
