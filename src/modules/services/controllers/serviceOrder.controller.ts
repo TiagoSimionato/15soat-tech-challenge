@@ -1,7 +1,8 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
+import { CurrentUserId } from '../../auth/decorators/current-user';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
@@ -104,5 +105,18 @@ export class ServiceOrderController {
     catch (error) {
       return res.status(500).send({ message: error });
     }
+  }
+
+  @RequireRoles([Roles.ADMIN])
+  @Post('/requested/:requestedServiceId/assign')
+  @HttpCode(HttpStatus.OK)
+  async assignRequestedServiceToEmployee(
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @CurrentUserId() employeeId: number,
+  ) {
+    await this.requestedServiceS.assignRequestedServiceToEmployee(
+      employeeId,
+      requestedServiceId,
+    );
   }
 }

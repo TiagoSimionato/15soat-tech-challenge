@@ -195,4 +195,27 @@ export class RequestedServiceService {
       );
     });
   }
+
+  async assignRequestedServiceToEmployee(employeeId: number, requestedServiceId: number) {
+    const requestedService = await this.requestedServiceRepository.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
+
+    if (!requestedService)
+      throw new BadRequestException('Resquested Service not found');
+
+    if (requestedService.employee)
+      throw new BadRequestException('Resquested Service already assigned');
+
+    if (requestedService.status !== RequestedServicesStatus.RECEBIDA)
+      throw new BadRequestException('Resquested Service already started');
+
+    if (requestedService.serviceItem) {
+      for (const item of requestedService.serviceItem) {
+        if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
+          throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+        }
+      }
+    }
+
+    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, started_at: undefined, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+  }
 }
