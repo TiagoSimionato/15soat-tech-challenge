@@ -128,4 +128,17 @@ export class ServiceOrderController {
       requestedServiceId,
     );
   }
+
+  @RequireRoles([Roles.ADMIN])
+  @Post('/requested/:requestedServiceId/review')
+  @HttpCode(HttpStatus.OK)
+  async reviewRequestedService(
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @CurrentUserId() employeeId: number,
+  ) {
+    await this.requestedServiceS.reviewRequestedService(
+      employeeId,
+      requestedServiceId,
+    );
+  }
 }

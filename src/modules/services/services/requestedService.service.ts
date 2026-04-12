@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Resource } from 'src/modules/resources/entities/resources.entity';
 import { ResourcesByService } from 'src/modules/resources/entities/resourcesByService.entity';
 import { ResourceService } from 'src/modules/resources/services/resources.service';
+import { Stock } from 'src/modules/stock/entities/stock.entity';
 import { StockResponse } from 'src/modules/stock/models/stock.model';
 import { StockService } from 'src/modules/stock/services/stock.service';
 import { DataSource, EntityManager, Repository } from 'typeorm';
@@ -213,21 +214,42 @@ export class RequestedServiceService {
 
     if (!requestedService)
       throw new BadRequestException('Resquested Service not found');
-
     if (requestedService.employee)
       throw new BadRequestException('Resquested Service already assigned');
-
     if (requestedService.status !== RequestedServicesStatus.RECEBIDA)
       throw new BadRequestException('Resquested Service already started');
 
-    if (requestedService.serviceItem) {
-      for (const item of requestedService.serviceItem) {
-        if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
-          throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, started_at: undefined, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+  }
+
+  async reviewRequestedService(employeeId: number, requestedServiceId: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(RequestedService);
+      const requestedService = await repo.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
+
+      if (!requestedService)
+        throw new BadRequestException('Resquested Service not found');
+      if (requestedService.employee?.id !== employeeId) {
+        throw new BadRequestException(
+          'Apenas o funcionário atribuído a este serviço pode analisá-lo.',
+        );
+      }
+      if (requestedService.status !== RequestedServicesStatus.EM_DIAGNOSTICO)
+        throw new BadRequestException('Resquested Service is not under evaluation');
+
+      if (requestedService.serviceItem) {
+        for (const item of requestedService.serviceItem) {
+          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
+            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+          }
+        }
+
+        for (const item of requestedService.serviceItem) {
+          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
         }
       }
-    }
 
-    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, started_at: undefined, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+      await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+    });
   }
 }
