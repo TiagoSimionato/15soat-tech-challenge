@@ -101,7 +101,7 @@ export class RequestedServiceService {
 
   async getRequestedServiceDetail(id: number, manager?: EntityManager): Promise<null | RequestedService> {
     const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
-    return await repo.findOne({ relations: ['service', 'serviceOrder', 'serviceItem'], where: { id } });
+    return await repo.findOne({ relations: ['service', 'serviceOrder', 'serviceItem', 'employee'], where: { id } });
   }
 
   async getRequestedServices(status?: RequestedServicesStatus): Promise<RequestedService[]> {
@@ -141,7 +141,7 @@ export class RequestedServiceService {
     }
   }
 
-  async upsertItemOnRequestedService(serviceItem: ServiceItemDTO) {
+  async upsertItemOnRequestedService(serviceItem: ServiceItemDTO, employeeId: number) {
     return this.dataSource.transaction(async (manager) => {
       const stock: null | StockResponse = await this.stockService.listStockByStockId(serviceItem.stock_id, manager);
 
@@ -156,6 +156,12 @@ export class RequestedServiceService {
       if (!requestedService) {
         throw new BadRequestException(
           'Ordem de serviço não identificada.',
+        );
+      }
+
+      if (requestedService.employee?.id !== employeeId) {
+        throw new BadRequestException(
+          'Apenas o funcionário atribuído a este serviço pode modificá-lo.',
         );
       }
 
@@ -174,17 +180,23 @@ export class RequestedServiceService {
     });
   }
 
-  async deleteRequestedServiceItem(requestedServiceId: number, serviceItemId: number) {
+  async deleteRequestedServiceItem(requestedServiceId: number, serviceItemId: number, employeeId: number) {
     return this.dataSource.transaction(async (manager) => {
       const repo = manager.getRepository(ServiceItem);
       const item = await repo.findOne({
-        relations: ['requestedService'],
+        relations: ['requestedService', 'requestedService.employee'],
         where: { id: serviceItemId },
       });
 
       if (!item || Number(item.requestedService.id) !== Number(requestedServiceId)) {
         throw new BadRequestException(
           'Item não encontrado na ordem de serviço fornecida.',
+        );
+      }
+
+      if (item.requestedService.employee?.id !== employeeId) {
+        throw new BadRequestException(
+          'Apenas o funcionário atribuído a este serviço pode removê-lo.',
         );
       }
 

@@ -45,9 +45,13 @@ export class ServiceOrderController {
 
   @RequireRoles([Roles.ADMIN])
   @Post('/item')
-  async upsertItemOnRequestedService(@Body() item: ServiceItemDTO, @Res() res: Response) {
+  async upsertItemOnRequestedService(
+    @Body() item: ServiceItemDTO,
+    @Res() res: Response,
+    @CurrentUserId() employeeId: number,
+  ) {
     try {
-      await this.requestedServiceS.upsertItemOnRequestedService(item);
+      await this.requestedServiceS.upsertItemOnRequestedService(item, employeeId);
       return res.status(201).send({ message: 'Item vínculado ao serviço com sucesso.' });
     }
     catch (error) {
@@ -97,9 +101,14 @@ export class ServiceOrderController {
 
   @RequireRoles([Roles.ADMIN])
   @Delete('/requested/:requestedServiceId/item/:serviceItemId')
-  async deleteRequestedServiceItem(@Param() requestedServiceId, @Param() serviceItemId, @Res() res: Response) {
+  async deleteRequestedServiceItem(
+    @Param() requestedServiceId,
+    @Param() serviceItemId,
+    @Res() res: Response,
+    @CurrentUserId() employeeId: number,
+  ) {
     try {
-      await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId.requestedServiceId, serviceItemId.serviceItemId);
+      await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId.requestedServiceId, serviceItemId.serviceItemId, employeeId);
       return res.status(200).send({ message: 'Item deletado com sucesso.' });
     }
     catch (error) {
