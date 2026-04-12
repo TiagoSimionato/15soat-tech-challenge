@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, ValidateNested } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 
 export class ServiceOrderServiceDTO {
   @IsInt()
@@ -7,11 +7,12 @@ export class ServiceOrderServiceDTO {
 }
 
 export class ServiceOrderDTO {
-  @IsInt()
-  user_id: number;
+  @IsNotEmpty()
+  @IsString()
+  userDocument: string;
 
   @IsInt()
-  vehicle_id: number;
+  vehicleId: number;
 
   @IsNotEmpty()
   @ValidateNested()

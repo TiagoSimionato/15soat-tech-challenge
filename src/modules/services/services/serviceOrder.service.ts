@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { User } from '../../users/entities/users.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { ServiceOrderStatus } from '../enums/services.types';
 import { ServiceOrderDTO } from '../models/serviceOrder.model';
@@ -17,15 +18,20 @@ export class ServiceOrderService {
 
   async createServiceOrder(serviceOrder: ServiceOrderDTO) {
     return this.dataSource.transaction(async (manager) => {
+      const user = await manager.findOne(User, { where: { document: serviceOrder.userDocument } });
+
+      if (!user)
+        throw new BadRequestException('No user with provided document');
+
       const dbServiceOrder = manager.create(ServiceOrder, {
         budget: 0,
         cost: 0,
         status: ServiceOrderStatus.PENDING,
         user: {
-          id: serviceOrder.user_id,
+          id: user.id,
         },
         vehicle: {
-          id: serviceOrder.vehicle_id,
+          id: serviceOrder.vehicleId,
         },
       });
 
