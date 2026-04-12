@@ -104,6 +104,10 @@ export class RequestedServiceService {
     return await repo.findOne({ relations: ['service', 'serviceOrder', 'serviceItem'], where: { id } });
   }
 
+  async getRequestedServices(status?: RequestedServicesStatus): Promise<RequestedService[]> {
+    return await this.requestedServiceRepository.find({ relations: ['service', 'serviceOrder', 'serviceItem', 'employee'], where: { status } });
+  }
+
   private async updateRequestedServiceCost(requestedServiceId: number, manager: EntityManager) {
     const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
     const itemsOfRequestedService: ServiceItem[] = await this.getServiceItemsByRequestedServiceId(requestedServiceId, manager);

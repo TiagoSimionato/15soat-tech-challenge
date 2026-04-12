@@ -5,6 +5,7 @@ import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
+import { RequestedServicesStatus } from '../enums/services.types';
 import { ServiceItemDTO } from '../models/serviceItem.model';
 import { ServiceOrderDTO } from '../models/serviceOrder.model';
 import { RequestedServiceService } from '../services/requestedService.service';
@@ -51,6 +52,13 @@ export class ServiceOrderController {
     catch (error) {
       return res.status(500).send({ message: error });
     }
+  }
+
+  @RequireRoles([Roles.ADMIN])
+  @Get('/requested/received')
+  async getReceivedRequestedService() {
+    const requestedServices: RequestedService[] = await this.requestedServiceS.getRequestedServices(RequestedServicesStatus.RECEBIDA);
+    return requestedServices;
   }
 
   @Get('/requested/:id')
