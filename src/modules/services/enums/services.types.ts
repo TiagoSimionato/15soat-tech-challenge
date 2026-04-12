@@ -1,6 +1,7 @@
 export enum ServiceOrderStatus {
   APPROVED = 'APPROVED',
   CANCELED = 'CANCELED',
+  FINALIZADA = 'FINALIZADA',
   PENDING = 'PENDING',
 }
 
