@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ColumnNumericTransformer } from '../../../common/transformers';
+import { User } from '../../users/entities/users.entity';
 import { ServiceItem } from './serviceItem.entity';
 import { ServiceOrder } from './serviceOrder.entity';
 import { Services } from './services.entity';
@@ -28,6 +29,10 @@ export class RequestedService {
   @ManyToOne(() => ServiceOrder, serviceOrder => serviceOrder.requestedService)
   @JoinColumn({ name: 'service_order_id' })
   serviceOrder: ServiceOrder;
+
+  @ManyToOne(() => User, user => user.workingServiceRequests)
+  @JoinColumn({ name: 'employee_id' })
+  employee: User;
 
   @OneToMany(() => ServiceItem, item => item.requestedService)
   serviceItem: ServiceItem[];
