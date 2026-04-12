@@ -11,7 +11,7 @@ import { StockService } from '../services/stock.service';
 export class StockController {
   constructor(
     @Inject()
-    private stockService: StockService,
+    private readonly stockService: StockService,
   ) { }
 
   @Post()

@@ -11,7 +11,7 @@ const INVALID_PLATE_MESSAGE = 'Invalid Plate';
 export class VehicleService {
   constructor(
     @InjectRepository(Vehicle)
-    private vehicleRepository: Repository<Vehicle>,
+    private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
   async create(dto: VehicleDTO, userId: number) {

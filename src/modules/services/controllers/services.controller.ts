@@ -12,7 +12,7 @@ import { ServicesService } from '../services/services.service';
 export class ServicesController {
   constructor(
     @Inject()
-    private servicesService: ServicesService,
+    private readonly servicesService: ServicesService,
   ) { }
 
   @RequireRoles([Roles.ADMIN])

@@ -12,7 +12,7 @@ import { UserResponseDTO } from '../models/UserResponseDTO';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async findOne(username: string): Promise<null | User> {

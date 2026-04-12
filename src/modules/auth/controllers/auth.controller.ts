@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 
 @Controller({ path: 'auth' })
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @HttpCode(HttpStatus.OK)

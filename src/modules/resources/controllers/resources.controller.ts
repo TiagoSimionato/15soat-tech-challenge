@@ -15,7 +15,7 @@ import { ResourceService } from '../services/resources.service';
 export class ResourcesController {
   constructor(
     @Inject()
-    private resourceService: ResourceService,
+    private readonly resourceService: ResourceService,
   ) { }
 
   @Post()

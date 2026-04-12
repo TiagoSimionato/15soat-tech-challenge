@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ColumnNumericTransformer } from '../../../common/transformers';
 import { ResourceType, UnitType } from '../enums/resources.types';
 import { ResourcesByService } from './resourcesByService.entity';
 
@@ -13,7 +14,7 @@ export class Resource {
   @Column({ enum: ResourceType, type: 'enum' })
   type: string;
 
-  @Column({ type: 'numeric' })
+  @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   cost: number;
 
   @Column({ enum: UnitType, type: 'enum' })

@@ -1,4 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ColumnNumericTransformer } from '../../../common/transformers';
 import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
 import { RequestedService } from './requestedService.entity';
 
@@ -10,7 +11,7 @@ export class Services {
   @Column()
   name: string;
 
-  @Column({ type: 'numeric' })
+  @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   cost: number;
 
   @OneToMany(() => RequestedService, requestedService => requestedService.service)

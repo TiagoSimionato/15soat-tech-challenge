@@ -9,7 +9,7 @@ import { UserService } from '../services/users.service';
 export class UsersController {
   constructor(
     @Inject()
-    private userService: UserService,
+    private readonly userService: UserService,
   ) {}
 
   @Get()
