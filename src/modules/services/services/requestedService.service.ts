@@ -8,6 +8,7 @@ import { StockService } from 'src/modules/stock/services/stock.service';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
+import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { Services } from '../entities/services.entity';
 import { RequestedServicesStatus } from '../enums/services.types';
 import { ServiceItemDTO } from '../models/serviceItem.model';
@@ -43,6 +44,7 @@ export class RequestedServiceService {
 
       const requestedServiceId: number = (await manager.save(dbReqServiceOrder)).id;
       await this.createServiceItems(manager, requestedServiceId, arrServices[i].id);
+      await this.updateServiceOrderBudget(serviceOrderId, manager);
     }
   }
 
@@ -102,7 +104,7 @@ export class RequestedServiceService {
     return await repo.findOne({ relations: ['service', 'serviceOrder', 'serviceItem'], where: { id } });
   }
 
-  private async updateRequestedServiceCost(requestedServiceId: number, manager?: EntityManager) {
+  private async updateRequestedServiceCost(requestedServiceId: number, manager: EntityManager) {
     const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
     const itemsOfRequestedService: ServiceItem[] = await this.getServiceItemsByRequestedServiceId(requestedServiceId, manager);
     const requestedService: null | RequestedService = await this.getRequestedServiceDetail(requestedServiceId, manager);
@@ -118,6 +120,21 @@ export class RequestedServiceService {
     }
 
     await repo.update({ id: requestedServiceId }, { cost: totalCost });
+    if (requestedService?.serviceOrder.id)
+      await this.updateServiceOrderBudget(requestedService.serviceOrder.id, manager);
+  }
+
+  private async updateServiceOrderBudget(serviceOrderId: number, manager: EntityManager) {
+    const repo = manager.getRepository(ServiceOrder);
+    const updatedServiceOrder = await repo.findOne({
+      relations: ['requestedService'],
+      where: { id: serviceOrderId },
+    });
+    if (updatedServiceOrder) {
+      const serviceOrderBudget = updatedServiceOrder.requestedService.reduce((acc, requestedService) => requestedService.cost + acc, 0);
+      updatedServiceOrder.budget = serviceOrderBudget;
+      await repo.save(updatedServiceOrder);
+    }
   }
 
   async upsertItemOnRequestedService(serviceItem: ServiceItemDTO) {
