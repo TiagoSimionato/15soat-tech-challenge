@@ -1,5 +1,5 @@
-import { ColumnNumericTransformer } from 'src/common/transformers';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ColumnNumericTransformer } from '../../../common/transformers';
 import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
 import { RequestedService } from './requestedService.entity';
 

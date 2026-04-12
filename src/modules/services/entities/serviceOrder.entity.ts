@@ -1,5 +1,5 @@
-import { ColumnNumericTransformer } from 'src/common/transformers';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ColumnNumericTransformer } from '../../../common/transformers';
 import { User } from '../../users/entities/users.entity';
 import { Vehicle } from '../../vehicle/entities/vehicle.entity';
 import { ServiceOrderStatus } from '../enums/services.types';
