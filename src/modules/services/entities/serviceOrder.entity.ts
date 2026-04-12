@@ -11,7 +11,7 @@ export class ServiceOrder {
   id: number;
 
   @Column({ enum: ServiceOrderStatus, type: 'enum' })
-  status: string;
+  status: ServiceOrderStatus;
 
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   budget: number;
