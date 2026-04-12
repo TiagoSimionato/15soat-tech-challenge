@@ -1,3 +1,4 @@
+import { ColumnNumericTransformer } from 'src/common/transformers';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ServiceItem } from './serviceItem.entity';
 import { ServiceOrder } from './serviceOrder.entity';
@@ -17,7 +18,7 @@ export class RequestedService {
   @Column({ nullable: true })
   finished_at: Date;
 
-  @Column({ type: 'numeric' })
+  @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   cost: number;
 
   @ManyToOne(() => Services, services => services.requestedService)

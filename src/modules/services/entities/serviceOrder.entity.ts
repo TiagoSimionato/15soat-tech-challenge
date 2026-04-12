@@ -1,3 +1,4 @@
+import { ColumnNumericTransformer } from 'src/common/transformers';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
 import { Vehicle } from '../../vehicle/entities/vehicle.entity';
@@ -12,10 +13,10 @@ export class ServiceOrder {
   @Column({ enum: ServiceOrderStatus, type: 'enum' })
   status: string;
 
-  @Column({ type: 'numeric' })
+  @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   budget: number;
 
-  @Column({ type: 'numeric' })
+  @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   cost: number;
 
   @ManyToOne(() => User, user => user.orders)
