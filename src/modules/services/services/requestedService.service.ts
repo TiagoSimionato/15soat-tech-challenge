@@ -253,6 +253,13 @@ export class RequestedServiceService {
     });
   }
 
+  async listUserAwaitingApprovalRequestedServices(clientId: number) {
+    return await this.requestedServiceRepository.find({
+      relations: ['service', 'serviceItem'],
+      where: { serviceOrder: { user: { id: clientId } }, status: RequestedServicesStatus.AGUARDANDO_APROVACAO },
+    });
+  }
+
   async approveRequestedService(clientId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
       const repo = manager.getRepository(RequestedService);

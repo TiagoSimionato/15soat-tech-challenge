@@ -66,6 +66,16 @@ export class ServiceOrderController {
     return requestedServices;
   }
 
+  @Get('/requested/awaiting-approval')
+  @HttpCode(HttpStatus.OK)
+  async getAwaitingApprovalRequestedServices(
+    @CurrentUserId() clientId: number,
+  ) {
+    return await this.requestedServiceS.listUserAwaitingApprovalRequestedServices(
+      clientId,
+    );
+  }
+
   @Get('/requested/:id')
   async getRequestedServiceDetail(@Param() requestedServiceId, @Res() res: Response) {
     try {
