@@ -16,6 +16,12 @@ import { ServiceItemDTO } from '../models/serviceItem.model';
 import { ServiceOrderServiceDTO } from '../models/serviceOrder.model';
 import { ServicesService } from './services.service';
 
+type RequestedServiceValidations = {
+  clientId?: number;
+  employeeId?: number;
+  status?: RequestedServicesStatus;
+};
+
 @Injectable()
 export class RequestedServiceService {
   constructor(
@@ -163,12 +169,7 @@ export class RequestedServiceService {
           'Ordem de serviço não identificada.',
         );
       }
-
-      if (requestedService.employee?.id !== employeeId) {
-        throw new BadRequestException(
-          'Apenas o funcionário atribuído a este serviço pode modificá-lo.',
-        );
-      }
+      this.validateRequestedService(requestedService, { employeeId });
 
       const repo = manager.getRepository(ServiceItem);
       await repo.upsert({
@@ -198,12 +199,7 @@ export class RequestedServiceService {
           'Item não encontrado na ordem de serviço fornecida.',
         );
       }
-
-      if (item.requestedService.employee?.id !== employeeId) {
-        throw new BadRequestException(
-          'Apenas o funcionário atribuído a este serviço pode removê-lo.',
-        );
-      }
+      this.validateRequestedService(item.requestedService, { employeeId });
 
       await repo.remove(item);
       await this.updateRequestedServiceCost(
@@ -214,33 +210,20 @@ export class RequestedServiceService {
   }
 
   async assignRequestedServiceToEmployee(employeeId: number, requestedServiceId: number) {
-    const requestedService = await this.requestedServiceRepository.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
+    const requestedService = await this.getRequestedService(requestedServiceId);
 
-    if (!requestedService)
-      throw new BadRequestException('Requested Service not found');
+    this.validateRequestedService(requestedService, { status: RequestedServicesStatus.RECEBIDA });
     if (requestedService.employee)
       throw new BadRequestException('Requested Service already assigned');
-    if (requestedService.status !== RequestedServicesStatus.RECEBIDA)
-      throw new BadRequestException('Requested Service already started');
 
-    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, started_at: undefined, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, status: RequestedServicesStatus.EM_DIAGNOSTICO });
   }
 
   async reviewRequestedService(employeeId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
-      const repo = manager.getRepository(RequestedService);
-      const requestedService = await repo.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
+      const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      if (!requestedService)
-        throw new BadRequestException('Requested Service not found');
-      if (requestedService.employee?.id !== employeeId) {
-        throw new BadRequestException(
-          'Apenas o funcionário atribuído a este serviço pode analisá-lo.',
-        );
-      }
-      if (requestedService.status !== RequestedServicesStatus.EM_DIAGNOSTICO)
-        throw new BadRequestException('Resquested Service is not under evaluation');
-
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
       if (requestedService.serviceItem) {
         for (const item of requestedService.serviceItem) {
           if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
@@ -253,6 +236,7 @@ export class RequestedServiceService {
         }
       }
 
+      const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
     });
   }
@@ -266,53 +250,56 @@ export class RequestedServiceService {
 
   async approveRequestedService(clientId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
+      const requestedService = await this.getRequestedService(requestedServiceId, manager);
+
+      this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+
       const repo = manager.getRepository(RequestedService);
-      const requestedService = await repo.findOne({ relations: ['serviceOrder.user'], where: { id: requestedServiceId, serviceOrder: { user: { id: clientId } } } });
-
-      if (!requestedService)
-        throw new BadRequestException('Requested Service not found');
-      if (requestedService.status !== RequestedServicesStatus.AGUARDANDO_APROVACAO)
-        throw new BadRequestException('Resquested Service is not waiting approval');
-
       await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.APPROVED });
     });
   }
 
   async startRequestedService(employeeId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
+      const requestedService = await this.getRequestedService(requestedServiceId, manager);
+
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APPROVED });
+
       const repo = manager.getRepository(RequestedService);
-      const requestedService = await repo.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
-
-      if (!requestedService)
-        throw new BadRequestException('Requested Service not found');
-      if (requestedService.employee?.id !== employeeId) {
-        throw new BadRequestException(
-          'Apenas o funcionário atribuído a este serviço pode começá-lo.',
-        );
-      }
-      if (requestedService.status !== RequestedServicesStatus.APPROVED)
-        throw new BadRequestException('Resquested Service is not approved');
-
       await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });
     });
   }
 
   async finishRequestedService(employeeId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
+      const requestedService = await this.getRequestedService(requestedServiceId, manager);
+
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_EXECUCAO });
+
       const repo = manager.getRepository(RequestedService);
-      const requestedService = await repo.findOne({ relations: ['employee'], where: { id: requestedServiceId } });
-
-      if (!requestedService)
-        throw new BadRequestException('Requested Service not found');
-      if (requestedService.employee?.id !== employeeId) {
-        throw new BadRequestException(
-          'Apenas o funcionário atribuído a este serviço pode alterá-lo',
-        );
-      }
-      if (requestedService.status !== RequestedServicesStatus.EM_EXECUCAO)
-        throw new BadRequestException('Resquested Service is not started');
-
       await repo.update({ id: requestedServiceId }, { finished_at: new Date(), status: RequestedServicesStatus.FINALIZADA });
     });
+  }
+
+  private async getRequestedService(requestedServiceId: number, manager?: EntityManager): Promise<RequestedService> {
+    const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
+    const requestedService = await repo.findOne({
+      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'serviceOrder.user'],
+      where: { id: requestedServiceId },
+    });
+
+    if (!requestedService)
+      throw new BadRequestException('Requested Service not found');
+
+    return requestedService;
+  }
+
+  private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
+    if (validations.employeeId && requestedService.employee.id !== validations.employeeId)
+      throw new BadRequestException('Apenas o funcionário atribuído a este serviço pode alterá-lo');
+    if (validations.clientId && requestedService.serviceOrder.user.id !== validations.clientId)
+      throw new BadRequestException('Requested Service not found');
+    if (validations.status && validations.status !== requestedService.status)
+      throw new BadRequestException(`Requested Service has status ${requestedService.status} but needed status ${validations.status}`);
   }
 }
