@@ -172,4 +172,17 @@ export class ServiceOrderController {
       requestedServiceId,
     );
   }
+
+  @RequireRoles([Roles.ADMIN])
+  @Post('/requested/:requestedServiceId/start')
+  @HttpCode(HttpStatus.OK)
+  async startRequestedService(
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @CurrentUserId() employeeId: number,
+  ) {
+    await this.requestedServiceS.startRequestedService(
+      employeeId,
+      requestedServiceId,
+    );
+  }
 }
