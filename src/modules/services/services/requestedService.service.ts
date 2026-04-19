@@ -296,4 +296,23 @@ export class RequestedServiceService {
       await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });
     });
   }
+
+  async finishRequestedService(employeeId: number, requestedServiceId: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(RequestedService);
+      const requestedService = await repo.findOne({ relations: ['employee'], where: { id: requestedServiceId } });
+
+      if (!requestedService)
+        throw new BadRequestException('Requested Service not found');
+      if (requestedService.employee?.id !== employeeId) {
+        throw new BadRequestException(
+          'Apenas o funcionário atribuído a este serviço pode alterá-lo',
+        );
+      }
+      if (requestedService.status !== RequestedServicesStatus.EM_EXECUCAO)
+        throw new BadRequestException('Resquested Service is not started');
+
+      await repo.update({ id: requestedServiceId }, { finished_at: new Date(), status: RequestedServicesStatus.FINALIZADA });
+    });
+  }
 }

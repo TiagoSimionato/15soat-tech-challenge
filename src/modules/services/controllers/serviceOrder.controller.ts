@@ -185,4 +185,17 @@ export class ServiceOrderController {
       requestedServiceId,
     );
   }
+
+  @RequireRoles([Roles.ADMIN])
+  @Post('/requested/:requestedServiceId/finish')
+  @HttpCode(HttpStatus.OK)
+  async finishRequestedService(
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @CurrentUserId() employeeId: number,
+  ) {
+    await this.requestedServiceS.finishRequestedService(
+      employeeId,
+      requestedServiceId,
+    );
+  }
 }
