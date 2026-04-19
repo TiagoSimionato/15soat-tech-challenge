@@ -11,7 +11,7 @@ import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { Services } from '../entities/services.entity';
-import { RequestedServicesStatus } from '../enums/services.types';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../enums/services.types';
 import { ServiceItemDTO } from '../models/serviceItem.model';
 import { ServiceOrderServiceDTO } from '../models/serviceOrder.model';
 import { ServicesService } from './services.service';
@@ -254,8 +254,37 @@ export class RequestedServiceService {
 
       this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
 
-      const repo = manager.getRepository(RequestedService);
-      await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.APPROVED });
+      const requestedServiceRepo = manager.getRepository(RequestedService);
+      await requestedServiceRepo.update({ id: requestedServiceId }, {
+        status: RequestedServicesStatus.APPROVED,
+      });
+
+      const updateServiceOrderStatus = requestedService.serviceOrder.status === ServiceOrderStatus.PENDING;
+      if (updateServiceOrderStatus) {
+        const serviceOrderRepo = manager.getRepository(ServiceOrder);
+        await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
+          status: ServiceOrderStatus.APPROVED,
+        });
+      }
+    });
+  }
+
+  async cancelRequestedService(clientId: number, requestedServiceId: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const requestedService = await this.getRequestedService(requestedServiceId, manager);
+
+      this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+
+      const requestedServiceRepo = manager.getRepository(RequestedService);
+      await requestedServiceRepo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.CANCELED });
+
+      const updateServiceOrderStatus = requestedService.serviceOrder.requestedService.every(it => it.status === RequestedServicesStatus.CANCELED);
+      if (updateServiceOrderStatus) {
+        const serviceOrderRepo = manager.getRepository(ServiceOrder);
+        await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
+          status: ServiceOrderStatus.APPROVED,
+        });
+      }
     });
   }
 
@@ -284,7 +313,7 @@ export class RequestedServiceService {
   private async getRequestedService(requestedServiceId: number, manager?: EntityManager): Promise<RequestedService> {
     const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
     const requestedService = await repo.findOne({
-      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'serviceOrder.user'],
+      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'serviceOrder.user', 'serviceOrder.requestedService'],
       where: { id: requestedServiceId },
     });
 

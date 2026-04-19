@@ -4,23 +4,21 @@ import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { CurrentUserId } from '../../auth/decorators/current-user';
 import { RequestedService } from '../entities/requestedService.entity';
-import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { RequestedServicesStatus } from '../enums/services.types';
 import { ServiceItemDTO } from '../models/serviceItem.model';
-import { ServiceOrderDTO } from '../models/serviceOrder.model';
 import { RequestedServiceService } from '../services/requestedService.service';
 import { ServiceOrderService } from '../services/serviceOrder.service';
 
-@Controller('services_order')
-export class ServiceOrderController {
+@RequireRoles([Roles.ADMIN])
+@Controller('services-order')
+export class ServiceOrderEmployeeController {
   constructor(
     @Inject()
     private readonly serviceOrderService: ServiceOrderService,
     private readonly requestedServiceS: RequestedServiceService,
   ) { }
 
-  @RequireRoles([Roles.ADMIN])
   @Get()
   async getOrders(@Res() res: Response) {
     try {
@@ -32,18 +30,6 @@ export class ServiceOrderController {
     }
   }
 
-  @Post()
-  async createServiceOrder(@Body() order: ServiceOrderDTO, @Res() res: Response) {
-    try {
-      await this.serviceOrderService.createServiceOrder(order);
-      return res.status(201).send({ message: 'Ordem de serviço criada com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
-  }
-
-  @RequireRoles([Roles.ADMIN])
   @Post('/item')
   async upsertItemOnRequestedService(
     @Body() item: ServiceItemDTO,
@@ -59,14 +45,12 @@ export class ServiceOrderController {
     }
   }
 
-  @RequireRoles([Roles.ADMIN])
   @Get('/requested/received')
   async getReceivedRequestedService() {
     const requestedServices: RequestedService[] = await this.requestedServiceS.getRequestedServices(RequestedServicesStatus.RECEBIDA);
     return requestedServices;
   }
 
-  @RequireRoles([Roles.ADMIN])
   @Get('/requested/me')
   async getEmployeeRequestedService(
     @CurrentUserId() employeeId: number,
@@ -75,50 +59,6 @@ export class ServiceOrderController {
     return requestedServices;
   }
 
-  @Get('/requested/awaiting-approval')
-  @HttpCode(HttpStatus.OK)
-  async getAwaitingApprovalRequestedServices(
-    @CurrentUserId() clientId: number,
-  ) {
-    return await this.requestedServiceS.listUserAwaitingApprovalRequestedServices(
-      clientId,
-    );
-  }
-
-  @Get('/requested/:id')
-  async getRequestedServiceDetail(@Param() requestedServiceId, @Res() res: Response) {
-    try {
-      const requestedService: null | RequestedService = await this.requestedServiceS.getRequestedServiceDetail(requestedServiceId.id);
-      return res.status(200).send(requestedService);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
-  }
-
-  @Get('/requested/:id/items')
-  async getServiceItemsByRequestedServiceId(@Param() requestedServiceId, @Res() res: Response) {
-    try {
-      const items: null | ServiceItem[] = await this.requestedServiceS.getServiceItemsByRequestedServiceId(requestedServiceId.id);
-      return res.status(200).send(items);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
-  }
-
-  @Get('/:id')
-  async getOrderDetail(@Param() serviceOrderId, @Res() res: Response) {
-    try {
-      const serviceOrder: null | ServiceOrder = await this.serviceOrderService.getOrderDetail(serviceOrderId.id);
-      return res.status(200).send(serviceOrder);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
-  }
-
-  @RequireRoles([Roles.ADMIN])
   @Delete('/requested/:requestedServiceId/item/:serviceItemId')
   async deleteRequestedServiceItem(
     @Param() requestedServiceId,
@@ -135,7 +75,6 @@ export class ServiceOrderController {
     }
   }
 
-  @RequireRoles([Roles.ADMIN])
   @Post('/requested/:requestedServiceId/assign')
   @HttpCode(HttpStatus.OK)
   async assignRequestedServiceToEmployee(
@@ -148,7 +87,6 @@ export class ServiceOrderController {
     );
   }
 
-  @RequireRoles([Roles.ADMIN])
   @Post('/requested/:requestedServiceId/review')
   @HttpCode(HttpStatus.OK)
   async reviewRequestedService(
@@ -161,19 +99,6 @@ export class ServiceOrderController {
     );
   }
 
-  @Post('/requested/:requestedServiceId/approve')
-  @HttpCode(HttpStatus.OK)
-  async approveRequestedService(
-    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
-    @CurrentUserId() clientId: number,
-  ) {
-    await this.requestedServiceS.approveRequestedService(
-      clientId,
-      requestedServiceId,
-    );
-  }
-
-  @RequireRoles([Roles.ADMIN])
   @Post('/requested/:requestedServiceId/start')
   @HttpCode(HttpStatus.OK)
   async startRequestedService(
@@ -186,7 +111,6 @@ export class ServiceOrderController {
     );
   }
 
-  @RequireRoles([Roles.ADMIN])
   @Post('/requested/:requestedServiceId/finish')
   @HttpCode(HttpStatus.OK)
   async finishRequestedService(
