@@ -66,6 +66,15 @@ export class ServiceOrderController {
     return requestedServices;
   }
 
+  @RequireRoles([Roles.ADMIN])
+  @Get('/requested/me')
+  async getEmployeeRequestedService(
+    @CurrentUserId() employeeId: number,
+  ) {
+    const requestedServices: RequestedService[] = await this.requestedServiceS.getEmployeeRequestedServices(employeeId);
+    return requestedServices;
+  }
+
   @Get('/requested/awaiting-approval')
   @HttpCode(HttpStatus.OK)
   async getAwaitingApprovalRequestedServices(
