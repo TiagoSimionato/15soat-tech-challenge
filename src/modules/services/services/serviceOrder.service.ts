@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
-import { ServiceOrderStatus } from '../enums/services.types';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../enums/services.types';
 import { ServiceOrderDTO } from '../models/serviceOrder.model';
 import { RequestedServiceService } from './requestedService.service';
 
@@ -41,10 +41,34 @@ export class ServiceOrderService {
   }
 
   async getOrders(): Promise<null | ServiceOrder[]> {
-    return await this.serviceOrderRepository.find({ relations: ['vehicle', 'user', 'requestedService'] });
+    return await this.serviceOrderRepository.find({ relations: ['vehicle', 'user', 'requestedServices'] });
   }
 
   async getOrderDetail(id: number): Promise<null | ServiceOrder> {
-    return await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedService'], where: { id } });
+    return await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedServices'], where: { id } });
+  }
+
+  async deliverServiceOrder(id: number) {
+    const serviceOrder = await this.serviceOrderRepository.findOne({ relations: ['requestedServices'], where: { id } });
+
+    if (!serviceOrder)
+      throw new BadRequestException('Service order not found');
+
+    const allValidStatus = serviceOrder.requestedServices.every(requestedService =>
+      requestedService.status === RequestedServicesStatus.FINALIZADA || requestedService.status === RequestedServicesStatus.CANCELED);
+    const anyFinished = serviceOrder.requestedServices.some(requestedService =>
+      requestedService.status === RequestedServicesStatus.FINALIZADA);
+    const canDeliver = anyFinished && allValidStatus;
+
+    if (!canDeliver)
+      throw new BadRequestException('Service order cannot be delivered');
+
+    serviceOrder.status = ServiceOrderStatus.ENTREGUE;
+    serviceOrder.requestedServices.forEach((requestedService) => {
+      if (requestedService.status === RequestedServicesStatus.FINALIZADA) {
+        requestedService.status = RequestedServicesStatus.ENTREGUE;
+      }
+    });
+    this.serviceOrderRepository.save(serviceOrder);
   }
 }

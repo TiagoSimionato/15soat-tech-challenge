@@ -23,7 +23,7 @@ export class ServiceOrder {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => RequestedService, requestedService => requestedService.serviceOrder)
+  @OneToMany(() => RequestedService, requestedService => requestedService.serviceOrder, { cascade: ['update'] })
   requestedServices: RequestedService[];
 
   @ManyToOne(() => Vehicle, vehicle => vehicle.serviceOrder)

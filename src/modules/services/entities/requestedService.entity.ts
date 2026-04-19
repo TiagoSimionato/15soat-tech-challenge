@@ -26,7 +26,7 @@ export class RequestedService {
   @JoinColumn({ name: 'service_id' })
   service: Services;
 
-  @ManyToOne(() => ServiceOrder, serviceOrder => serviceOrder.requestedServices)
+  @ManyToOne(() => ServiceOrder, serviceOrder => serviceOrder.requestedServices, { cascade: ['update'] })
   @JoinColumn({ name: 'service_order_id' })
   serviceOrder: ServiceOrder;
 

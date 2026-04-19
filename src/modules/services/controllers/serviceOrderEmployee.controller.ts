@@ -122,4 +122,14 @@ export class ServiceOrderEmployeeController {
       requestedServiceId,
     );
   }
+
+  @Post('/:id/deliver')
+  @HttpCode(HttpStatus.OK)
+  async deliverRequestedService(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.serviceOrderService.deliverServiceOrder(
+      id,
+    );
+  }
 }
