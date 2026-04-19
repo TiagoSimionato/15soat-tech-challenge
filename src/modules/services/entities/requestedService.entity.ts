@@ -26,7 +26,7 @@ export class RequestedService {
   @JoinColumn({ name: 'service_id' })
   service: Services;
 
-  @ManyToOne(() => ServiceOrder, serviceOrder => serviceOrder.requestedService)
+  @ManyToOne(() => ServiceOrder, serviceOrder => serviceOrder.requestedServices)
   @JoinColumn({ name: 'service_order_id' })
   serviceOrder: ServiceOrder;
 
