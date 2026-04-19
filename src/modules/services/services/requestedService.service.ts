@@ -256,14 +256,14 @@ export class RequestedServiceService {
 
       const requestedServiceRepo = manager.getRepository(RequestedService);
       await requestedServiceRepo.update({ id: requestedServiceId }, {
-        status: RequestedServicesStatus.APPROVED,
+        status: RequestedServicesStatus.APROVADO,
       });
 
-      const updateServiceOrderStatus = requestedService.serviceOrder.status === ServiceOrderStatus.PENDING;
+      const updateServiceOrderStatus = requestedService.serviceOrder.status === ServiceOrderStatus.PENDENTE;
       if (updateServiceOrderStatus) {
         const serviceOrderRepo = manager.getRepository(ServiceOrder);
         await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
-          status: ServiceOrderStatus.APPROVED,
+          status: ServiceOrderStatus.APROVADO,
         });
       }
     });
@@ -276,13 +276,13 @@ export class RequestedServiceService {
       this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
 
       const requestedServiceRepo = manager.getRepository(RequestedService);
-      await requestedServiceRepo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.CANCELED });
+      await requestedServiceRepo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.CANCELADO });
 
-      const updateServiceOrderStatus = requestedService.serviceOrder.requestedServices.every(it => it.status === RequestedServicesStatus.CANCELED);
+      const updateServiceOrderStatus = requestedService.serviceOrder.requestedServices.every(it => it.status === RequestedServicesStatus.CANCELADO);
       if (updateServiceOrderStatus) {
         const serviceOrderRepo = manager.getRepository(ServiceOrder);
         await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
-          status: ServiceOrderStatus.APPROVED,
+          status: ServiceOrderStatus.APROVADO,
         });
       }
     });
@@ -292,7 +292,7 @@ export class RequestedServiceService {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APPROVED });
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APROVADO });
 
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });

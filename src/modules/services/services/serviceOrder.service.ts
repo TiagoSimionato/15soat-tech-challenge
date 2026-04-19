@@ -26,7 +26,7 @@ export class ServiceOrderService {
       const dbServiceOrder = manager.create(ServiceOrder, {
         budget: 0,
         cost: 0,
-        status: ServiceOrderStatus.PENDING,
+        status: ServiceOrderStatus.PENDENTE,
         user: {
           id: user.id,
         },
@@ -55,7 +55,7 @@ export class ServiceOrderService {
       throw new BadRequestException('Service order not found');
 
     const allValidStatus = serviceOrder.requestedServices.every(requestedService =>
-      requestedService.status === RequestedServicesStatus.FINALIZADA || requestedService.status === RequestedServicesStatus.CANCELED);
+      requestedService.status === RequestedServicesStatus.FINALIZADA || requestedService.status === RequestedServicesStatus.CANCELADO);
     const anyFinished = serviceOrder.requestedServices.some(requestedService =>
       requestedService.status === RequestedServicesStatus.FINALIZADA);
     const canDeliver = anyFinished && allValidStatus;
