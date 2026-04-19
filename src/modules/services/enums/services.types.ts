@@ -7,6 +7,8 @@ export enum ServiceOrderStatus {
 
 export enum RequestedServicesStatus {
   AGUARDANDO_APROVACAO = 'AGUARDANDO APROVAÇÃO',
+  APPROVED = 'APPROVED',
+  CANCELED = 'CANCELED',
   EM_DIAGNOSTICO = 'EM DIAGNÓSTICO',
   EM_EXECUCAO = 'EM EXECUÇÃO',
   ENTREGUE = 'ENTEGUE',

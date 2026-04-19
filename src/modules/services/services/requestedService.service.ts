@@ -213,11 +213,11 @@ export class RequestedServiceService {
     const requestedService = await this.requestedServiceRepository.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
 
     if (!requestedService)
-      throw new BadRequestException('Resquested Service not found');
+      throw new BadRequestException('Requested Service not found');
     if (requestedService.employee)
-      throw new BadRequestException('Resquested Service already assigned');
+      throw new BadRequestException('Requested Service already assigned');
     if (requestedService.status !== RequestedServicesStatus.RECEBIDA)
-      throw new BadRequestException('Resquested Service already started');
+      throw new BadRequestException('Requested Service already started');
 
     await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, started_at: undefined, status: RequestedServicesStatus.EM_DIAGNOSTICO });
   }
@@ -228,7 +228,7 @@ export class RequestedServiceService {
       const requestedService = await repo.findOne({ relations: ['employee', 'serviceItem', 'serviceItem.stock'], where: { id: requestedServiceId } });
 
       if (!requestedService)
-        throw new BadRequestException('Resquested Service not found');
+        throw new BadRequestException('Requested Service not found');
       if (requestedService.employee?.id !== employeeId) {
         throw new BadRequestException(
           'Apenas o funcionário atribuído a este serviço pode analisá-lo.',
@@ -250,6 +250,20 @@ export class RequestedServiceService {
       }
 
       await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+    });
+  }
+
+  async approveRequestedService(clientId: number, requestedServiceId: number) {
+    return this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(RequestedService);
+      const requestedService = await repo.findOne({ relations: ['serviceOrder.user'], where: { id: requestedServiceId, serviceOrder: { user: { id: clientId } } } });
+
+      if (!requestedService)
+        throw new BadRequestException('Requested Service not found');
+      if (requestedService.status !== RequestedServicesStatus.AGUARDANDO_APROVACAO)
+        throw new BadRequestException('Resquested Service is not waiting approval');
+
+      await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.APPROVED });
     });
   }
 }

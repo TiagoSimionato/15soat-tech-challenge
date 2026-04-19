@@ -141,4 +141,16 @@ export class ServiceOrderController {
       requestedServiceId,
     );
   }
+
+  @Post('/requested/:requestedServiceId/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveRequestedService(
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @CurrentUserId() clientId: number,
+  ) {
+    await this.requestedServiceS.approveRequestedService(
+      clientId,
+      requestedServiceId,
+    );
+  }
 }
