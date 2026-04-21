@@ -5,7 +5,8 @@ import { ResourcesByService } from '../resources/entities/resourcesByService.ent
 import { ResourceService } from '../resources/services/resources.service';
 import { Stock } from '../stock/entities/stock.entity';
 import { StockService } from '../stock/services/stock.service';
-import { ServiceOrderController } from './controllers/serviceOrder.controller';
+import { ServiceOrderClientController } from './controllers/serviceOrderClient.controller';
+import { ServiceOrderEmployeeController } from './controllers/serviceOrderEmployee.controller';
 import { ServicesController } from './controllers/services.controller';
 import { RequestedService } from './entities/requestedService.entity';
 import { ServiceItem } from './entities/serviceItem.entity';
@@ -16,7 +17,7 @@ import { ServiceOrderService } from './services/serviceOrder.service';
 import { ServicesService } from './services/services.service';
 
 @Module({
-  controllers: [ServicesController, ServiceOrderController],
+  controllers: [ServicesController, ServiceOrderClientController, ServiceOrderEmployeeController],
   imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, Stock, Resource])],
   providers: [ServicesService, ServiceOrderService, StockService, ResourceService, RequestedServiceService],
 })

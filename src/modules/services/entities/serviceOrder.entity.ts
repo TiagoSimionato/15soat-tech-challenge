@@ -11,7 +11,7 @@ export class ServiceOrder {
   id: number;
 
   @Column({ enum: ServiceOrderStatus, type: 'enum' })
-  status: string;
+  status: ServiceOrderStatus;
 
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   budget: number;
@@ -23,8 +23,8 @@ export class ServiceOrder {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => RequestedService, requestedService => requestedService.serviceOrder)
-  requestedService: RequestedService[];
+  @OneToMany(() => RequestedService, requestedService => requestedService.serviceOrder, { cascade: ['update'] })
+  requestedServices: RequestedService[];
 
   @ManyToOne(() => Vehicle, vehicle => vehicle.serviceOrder)
   @JoinColumn({ name: 'vehicle_id' })
