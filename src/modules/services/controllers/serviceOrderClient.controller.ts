@@ -39,13 +39,8 @@ export class ServiceOrderClientController {
 
   @Get('/requested/:id')
   async getRequestedServiceDetail(@Param() requestedServiceId, @Res() res: Response) {
-    try {
-      const requestedService: null | RequestedService = await this.requestedServiceS.getRequestedServiceDetail(requestedServiceId.id);
-      return res.status(200).send(requestedService);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const requestedService: null | RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId.id);
+    return res.status(200).send(requestedService);
   }
 
   @Get('/requested/:id/items')

@@ -106,9 +106,17 @@ export class RequestedServiceService {
     });
   }
 
-  async getRequestedServiceDetail(id: number, manager?: EntityManager): Promise<null | RequestedService> {
-    const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
-    return await repo.findOne({ relations: ['service', 'serviceOrder', 'serviceItem', 'employee'], where: { id } });
+  async getRequestedService(id: number, manager?: EntityManager): Promise<RequestedService> {
+    const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
+    const requestedService = await repo.findOne({
+      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'service', 'serviceOrder', 'serviceOrder.user', 'serviceOrder.requestedServices'],
+      where: { id },
+    });
+
+    if (!requestedService)
+      throw new BadRequestException('Requested Service not found');
+
+    return requestedService;
   }
 
   async getRequestedServices(status?: RequestedServicesStatus): Promise<RequestedService[]> {
@@ -122,7 +130,7 @@ export class RequestedServiceService {
   private async updateRequestedServiceCost(requestedServiceId: number, manager: EntityManager) {
     const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
     const itemsOfRequestedService: ServiceItem[] = await this.getServiceItemsByRequestedServiceId(requestedServiceId, manager);
-    const requestedService: null | RequestedService = await this.getRequestedServiceDetail(requestedServiceId, manager);
+    const requestedService: RequestedService = await this.getRequestedService(requestedServiceId, manager);
     const service: null | Services = requestedService ? await this.servicesService.listOneService(requestedService.service.id, manager) : null;
     const serviceCost: number = service ? service.cost : 0;
     let totalCost: number = Number(serviceCost);
@@ -162,13 +170,8 @@ export class RequestedServiceService {
         );
       }
 
-      const requestedService: null | RequestedService = await this.getRequestedServiceDetail(serviceItem.requested_service_id, manager);
+      const requestedService: RequestedService = await this.getRequestedService(serviceItem.requested_service_id, manager);
 
-      if (!requestedService) {
-        throw new BadRequestException(
-          'Ordem de serviço não identificada.',
-        );
-      }
       this.validateRequestedService(requestedService, { employeeId });
 
       const repo = manager.getRepository(ServiceItem);
@@ -308,19 +311,6 @@ export class RequestedServiceService {
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { finished_at: new Date(), status: RequestedServicesStatus.FINALIZADA });
     });
-  }
-
-  private async getRequestedService(requestedServiceId: number, manager?: EntityManager): Promise<RequestedService> {
-    const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
-    const requestedService = await repo.findOne({
-      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'serviceOrder.user', 'serviceOrder.requestedServices'],
-      where: { id: requestedServiceId },
-    });
-
-    if (!requestedService)
-      throw new BadRequestException('Requested Service not found');
-
-    return requestedService;
   }
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
