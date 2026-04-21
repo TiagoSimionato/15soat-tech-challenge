@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../../users/entities/users.entity';
@@ -44,8 +44,13 @@ export class ServiceOrderService {
     return await this.serviceOrderRepository.find({ relations: ['vehicle', 'user', 'requestedServices'] });
   }
 
-  async getOrderDetail(id: number): Promise<null | ServiceOrder> {
-    return await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedServices'], where: { id } });
+  async getOrderDetail(id: number): Promise<ServiceOrder> {
+    const serviceOrder = await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedServices'], where: { id } });
+
+    if (!serviceOrder)
+      throw new NotFoundException('Service Order not found');
+
+    return serviceOrder;
   }
 
   async deliverServiceOrder(id: number) {

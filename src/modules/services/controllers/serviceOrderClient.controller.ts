@@ -39,7 +39,7 @@ export class ServiceOrderClientController {
 
   @Get('/requested/:id')
   async getRequestedServiceDetail(@Param() requestedServiceId, @Res() res: Response) {
-    const requestedService: null | RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId.id);
+    const requestedService: RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId.id);
     return res.status(200).send(requestedService);
   }
 
@@ -56,13 +56,8 @@ export class ServiceOrderClientController {
 
   @Get('/:id')
   async getOrderDetail(@Param() serviceOrderId, @Res() res: Response) {
-    try {
-      const serviceOrder: null | ServiceOrder = await this.serviceOrderService.getOrderDetail(serviceOrderId.id);
-      return res.status(200).send(serviceOrder);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const serviceOrder: ServiceOrder = await this.serviceOrderService.getOrderDetail(serviceOrderId.id);
+    return res.status(200).send(serviceOrder);
   }
 
   @Post('/requested/:requestedServiceId/approve')
