@@ -7,7 +7,7 @@ export class DatabaseSeeding1776626171488 implements MigrationInterface {
         await queryRunner.query(`
             INSERT INTO tb_user (id, name, username, password, document, legal_nature) 
             VALUES 
-            (1, 'Admin', 'admin', '$2b$10$EpWl6vI/T/oGzI6L3x.1jOq2yBw.yvK8Bf5.z.x.J.M.y.t.g.V.e', '84310979068', 'PF')
+            (1, 'Admin', 'admin', '$2b$10$OaeUDMnhVauytTC8n9bm0OFUobDEGkS9in1F7eRCSyzqlXvlzJgfK', '84310979068', 'PF')
             ON CONFLICT (id) DO NOTHING;
         `);
         await queryRunner.query(`SELECT setval('tb_user_id_seq', (SELECT MAX(id) FROM tb_user));`).catch(() => {});
