@@ -20,6 +20,7 @@ type RequestedServiceValidations = {
   clientId?: number;
   employeeId?: number;
   status?: RequestedServicesStatus;
+  vehicleArrived?: boolean;
 };
 
 @Injectable()
@@ -215,7 +216,10 @@ export class RequestedServiceService {
   async assignRequestedServiceToEmployee(employeeId: number, requestedServiceId: number) {
     const requestedService = await this.getRequestedService(requestedServiceId);
 
-    this.validateRequestedService(requestedService, { status: RequestedServicesStatus.RECEBIDA });
+    this.validateRequestedService(requestedService, {
+      status: RequestedServicesStatus.RECEBIDA,
+      vehicleArrived: true,
+    });
     if (requestedService.employee)
       throw new BadRequestException('Requested Service already assigned');
 
@@ -314,11 +318,13 @@ export class RequestedServiceService {
   }
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
-    if (validations.employeeId && requestedService.employee.id !== validations.employeeId)
+    if (validations.employeeId && requestedService.employee?.id !== validations.employeeId)
       throw new BadRequestException('Apenas o funcionário atribuído a este serviço pode alterá-lo');
     if (validations.clientId && requestedService.serviceOrder.user.id !== validations.clientId)
       throw new BadRequestException('Requested Service not found');
     if (validations.status && validations.status !== requestedService.status)
       throw new BadRequestException(`Requested Service has status ${requestedService.status} but needed status ${validations.status}`);
+    if (validations.vehicleArrived && !requestedService.serviceOrder.vehicle_arrived_at)
+      throw new BadRequestException('Vehicle have not arrived');
   }
 }
