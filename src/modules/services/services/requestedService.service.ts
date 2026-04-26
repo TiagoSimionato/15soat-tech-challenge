@@ -20,6 +20,7 @@ type RequestedServiceValidations = {
   clientId?: number;
   employeeId?: number;
   status?: RequestedServicesStatus;
+  vehicleArrived?: boolean;
 };
 
 @Injectable()
@@ -172,7 +173,7 @@ export class RequestedServiceService {
 
       const requestedService: RequestedService = await this.getRequestedService(serviceItem.requested_service_id, manager);
 
-      this.validateRequestedService(requestedService, { employeeId });
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
 
       const repo = manager.getRepository(ServiceItem);
       await repo.upsert({
@@ -202,7 +203,7 @@ export class RequestedServiceService {
           'Item não encontrado na ordem de serviço fornecida.',
         );
       }
-      this.validateRequestedService(item.requestedService, { employeeId });
+      this.validateRequestedService(item.requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
 
       await repo.remove(item);
       await this.updateRequestedServiceCost(
@@ -215,7 +216,10 @@ export class RequestedServiceService {
   async assignRequestedServiceToEmployee(employeeId: number, requestedServiceId: number) {
     const requestedService = await this.getRequestedService(requestedServiceId);
 
-    this.validateRequestedService(requestedService, { status: RequestedServicesStatus.RECEBIDA });
+    this.validateRequestedService(requestedService, {
+      status: RequestedServicesStatus.RECEBIDA,
+      vehicleArrived: true,
+    });
     if (requestedService.employee)
       throw new BadRequestException('Requested Service already assigned');
 
@@ -227,17 +231,6 @@ export class RequestedServiceService {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
       this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
-      if (requestedService.serviceItem) {
-        for (const item of requestedService.serviceItem) {
-          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
-            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
-          }
-        }
-
-        for (const item of requestedService.serviceItem) {
-          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
-        }
-      }
 
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
@@ -296,6 +289,17 @@ export class RequestedServiceService {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
       this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APROVADO });
+      if (requestedService.serviceItem) {
+        for (const item of requestedService.serviceItem) {
+          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
+            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+          }
+        }
+
+        for (const item of requestedService.serviceItem) {
+          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
+        }
+      }
 
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });
@@ -314,11 +318,13 @@ export class RequestedServiceService {
   }
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
-    if (validations.employeeId && requestedService.employee.id !== validations.employeeId)
+    if (validations.employeeId && requestedService.employee?.id !== validations.employeeId)
       throw new BadRequestException('Apenas o funcionário atribuído a este serviço pode alterá-lo');
     if (validations.clientId && requestedService.serviceOrder.user.id !== validations.clientId)
       throw new BadRequestException('Requested Service not found');
     if (validations.status && validations.status !== requestedService.status)
       throw new BadRequestException(`Requested Service has status ${requestedService.status} but needed status ${validations.status}`);
+    if (validations.vehicleArrived && !requestedService.serviceOrder.vehicle_arrived_at)
+      throw new BadRequestException('Vehicle have not arrived');
   }
 }
