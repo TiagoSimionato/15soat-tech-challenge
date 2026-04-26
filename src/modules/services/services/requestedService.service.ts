@@ -173,7 +173,7 @@ export class RequestedServiceService {
 
       const requestedService: RequestedService = await this.getRequestedService(serviceItem.requested_service_id, manager);
 
-      this.validateRequestedService(requestedService, { employeeId });
+      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
 
       const repo = manager.getRepository(ServiceItem);
       await repo.upsert({
@@ -203,7 +203,7 @@ export class RequestedServiceService {
           'Item não encontrado na ordem de serviço fornecida.',
         );
       }
-      this.validateRequestedService(item.requestedService, { employeeId });
+      this.validateRequestedService(item.requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
 
       await repo.remove(item);
       await this.updateRequestedServiceCost(
