@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put, Res } from '@nestjs/common';
 import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { UpdateResult } from 'typeorm';
@@ -39,9 +39,9 @@ export class ServicesController {
   }
 
   @Get('/:id')
-  async listOneService(@Param() serviceId, @Res() res: Response) {
+  async listOneService(@Param('id', ParseIntPipe) serviceId: number, @Res() res: Response) {
     try {
-      const services: null | Services = await this.servicesService.listOneService(serviceId.id);
+      const services: null | Services = await this.servicesService.listOneService(serviceId);
       if (!services)
         return res.status(404).send({ message: 'Serviço não foi encontrado.' });
 
@@ -54,9 +54,9 @@ export class ServicesController {
 
   @RequireRoles([Roles.ADMIN])
   @Put('/:id')
-  async updateService(@Param() servicesId, @Body() services: ServicesDTO, @Res() res: Response) {
+  async updateService(@Param('id', ParseIntPipe) servicesId: number, @Body() services: ServicesDTO, @Res() res: Response) {
     try {
-      const update: UpdateResult = await this.servicesService.updateService(servicesId.id, services);
+      const update: UpdateResult = await this.servicesService.updateService(servicesId, services);
       if (update.affected === 0)
         return res.status(404).send({ message: 'Serviço não foi encontrado.' });
 
@@ -69,9 +69,9 @@ export class ServicesController {
 
   @RequireRoles([Roles.ADMIN])
   @Delete('/:id')
-  async deleteService(@Param() servicesId, @Res() res: Response) {
+  async deleteService(@Param('id', ParseIntPipe) servicesId: number, @Res() res: Response) {
     try {
-      const deleted: DeleteResult = await this.servicesService.deleteService(servicesId.id);
+      const deleted: DeleteResult = await this.servicesService.deleteService(servicesId);
       if (deleted.affected === 0)
         return res.status(404).send({ message: 'Serviço não foi encontrado.' });
 

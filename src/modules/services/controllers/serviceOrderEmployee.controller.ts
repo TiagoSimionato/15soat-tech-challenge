@@ -62,13 +62,13 @@ export class ServiceOrderEmployeeController {
 
   @Delete('/requested/:requestedServiceId/item/:serviceItemId')
   async deleteRequestedServiceItem(
-    @Param() requestedServiceId,
-    @Param() serviceItemId,
+    @Param('requestedServiceId', ParseIntPipe) requestedServiceId: number,
+    @Param('serviceItemId', ParseIntPipe) serviceItemId: number,
     @Res() res: Response,
     @CurrentUserId() employeeId: number,
   ) {
     try {
-      await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId.requestedServiceId, serviceItemId.serviceItemId, employeeId);
+      await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId, serviceItemId, employeeId);
       return res.status(200).send({ message: 'Item deletado com sucesso.' });
     }
     catch (error) {

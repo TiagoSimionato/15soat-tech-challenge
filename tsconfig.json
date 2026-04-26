@@ -11,7 +11,7 @@
     "strictBindCallApply": false,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "declaration": true,
     "outDir": "./dist",
     "removeComments": true,

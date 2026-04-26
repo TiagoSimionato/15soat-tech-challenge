@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put, Res } from '@nestjs/common';
 import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { UpdateResult } from 'typeorm';
@@ -30,9 +30,14 @@ export class ResourcesController {
   }
 
   @Post('/:resourceId/service/:serviceId')
-  async createResourceForService(@Param() resourceId, @Param() serviceId, @Body() resourceQuantity: ResourceByServiceDTO, @Res() res: Response) {
+  async createResourceForService(
+    @Param('resourceId', ParseIntPipe) resourceId: number,
+    @Param('serviceId', ParseIntPipe) serviceId: number,
+    @Body() resourceQuantity: ResourceByServiceDTO,
+    @Res() res: Response,
+  ) {
     try {
-      await this.resourceService.createResourceForService(serviceId.serviceId, resourceId.resourceId, resourceQuantity.min_quantity);
+      await this.resourceService.createResourceForService(serviceId, resourceId, resourceQuantity.min_quantity);
       return res.status(201).send({ message: 'Recurso vínculado ao serviço com sucesso.' });
     }
     catch (error) {
@@ -52,9 +57,9 @@ export class ResourcesController {
   }
 
   @Get('/service/:id')
-  async listResourcesOfAService(@Param() serviceId, @Res() res: Response) {
+  async listResourcesOfAService(@Param('id', ParseIntPipe) serviceId: number, @Res() res: Response) {
     try {
-      const resources: null | ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId.id);
+      const resources: null | ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId);
       if (!resources)
         return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
@@ -66,9 +71,9 @@ export class ResourcesController {
   }
 
   @Get(':id')
-  async listOneResource(@Param() resourceId, @Res() res: Response) {
+  async listOneResource(@Param('id', ParseIntPipe) resourceId: number, @Res() res: Response) {
     try {
-      const resource: null | Resource = await this.resourceService.listOneResource(resourceId.id);
+      const resource: null | Resource = await this.resourceService.listOneResource(resourceId);
       if (!resource)
         return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
@@ -80,9 +85,9 @@ export class ResourcesController {
   }
 
   @Put(':id')
-  async updateResource(@Param() resourceId, @Body() resource: ResourceDTO, @Res() res: Response) {
+  async updateResource(@Param('id', ParseIntPipe) resourceId: number, @Body() resource: ResourceDTO, @Res() res: Response) {
     try {
-      const update: UpdateResult = await this.resourceService.updateResource(resourceId.id, resource);
+      const update: UpdateResult = await this.resourceService.updateResource(resourceId, resource);
       if (update.affected === 0)
         return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
@@ -94,9 +99,9 @@ export class ResourcesController {
   }
 
   @Put('service/:id')
-  async updateResourceQuantityOfAService(@Param() resourceServiceId, @Body() resourceQuantity: ResourceByServiceDTO, @Res() res: Response) {
+  async updateResourceQuantityOfAService(@Param('id', ParseIntPipe) resourceServiceId: number, @Body() resourceQuantity: ResourceByServiceDTO, @Res() res: Response) {
     try {
-      const update: UpdateResult = await this.resourceService.updateResourceQuantityOfAService(resourceServiceId.id, resourceQuantity.min_quantity);
+      const update: UpdateResult = await this.resourceService.updateResourceQuantityOfAService(resourceServiceId, resourceQuantity.min_quantity);
       if (update.affected === 0)
         return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
@@ -108,9 +113,9 @@ export class ResourcesController {
   }
 
   @Delete(':id')
-  async deleteResource(@Param() resourceId, @Res() res: Response) {
+  async deleteResource(@Param('id', ParseIntPipe) resourceId: number, @Res() res: Response) {
     try {
-      const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId.id);
+      const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId);
       if (deleted.affected === 0)
         return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
@@ -122,9 +127,9 @@ export class ResourcesController {
   }
 
   @Delete('/service/:id')
-  async deleteResourceOfAService(@Param() resourceServiceId, @Res() res: Response) {
+  async deleteResourceOfAService(@Param('id', ParseIntPipe) resourceServiceId: number, @Res() res: Response) {
     try {
-      const deleted: DeleteResult = await this.resourceService.deleteResourceOfAService(resourceServiceId.id);
+      const deleted: DeleteResult = await this.resourceService.deleteResourceOfAService(resourceServiceId);
       if (deleted.affected === 0)
         return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
