@@ -334,10 +334,10 @@ export class RequestedServiceService {
       (acc, rs) => acc + (rs.finished_at.getTime() - rs.started_at.getTime()),
       0,
     );
-    const averageDurationInMinutes = (totalDurationMs / requestedServices.length / 1000 / 60) || 0;
+    const averageDurationInHours = (totalDurationMs / requestedServices.length / 1000 / 60 / 60) || 0;
 
     return {
-      averageDurationInMinutes,
+      averageDurationInHours,
       totalServicesAnalyzed: requestedServices.length,
     };
   }
