@@ -52,6 +52,11 @@ export class ServiceOrderEmployeeController {
     return requestedServices;
   }
 
+  @Get('/requested/average-duration')
+  async getAverageDuration() {
+    return await this.requestedServiceS.getAverageServiceDuration();
+  }
+
   @Get('/requested/me')
   async getEmployeeRequestedService(
     @CurrentUserId() employeeId: number,
