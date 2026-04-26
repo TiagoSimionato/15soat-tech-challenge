@@ -6,7 +6,7 @@ import { ResourceService } from 'src/modules/resources/services/resources.servic
 import { Stock } from 'src/modules/stock/entities/stock.entity';
 import { StockResponse } from 'src/modules/stock/models/stock.model';
 import { StockService } from 'src/modules/stock/services/stock.service';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
@@ -315,6 +315,33 @@ export class RequestedServiceService {
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { finished_at: new Date(), status: RequestedServicesStatus.FINALIZADA });
     });
+  }
+
+  async getAverageServiceDuration(serviceId?: number) {
+    const requestedServices = await this.requestedServiceRepository.find({
+      where: [{
+        finished_at: Not(IsNull()),
+        service: { id: serviceId },
+        started_at: Not(IsNull()),
+        status: RequestedServicesStatus.FINALIZADA,
+      }, {
+        finished_at: Not(IsNull()),
+        service: { id: serviceId },
+        started_at: Not(IsNull()),
+        status: RequestedServicesStatus.ENTREGUE,
+      }],
+    });
+
+    const totalDurationMs = requestedServices.reduce(
+      (acc, rs) => acc + (rs.finished_at.getTime() - rs.started_at.getTime()),
+      0,
+    );
+    const averageDurationInHours = (totalDurationMs / requestedServices.length / 1000 / 60 / 60) || 0;
+
+    return {
+      averageDurationInHours,
+      totalServicesAnalyzed: requestedServices.length,
+    };
   }
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {

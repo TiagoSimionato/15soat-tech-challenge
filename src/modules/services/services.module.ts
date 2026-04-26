@@ -17,7 +17,7 @@ import { ServiceOrderService } from './services/serviceOrder.service';
 import { ServicesService } from './services/services.service';
 
 @Module({
-  controllers: [ServicesController, ServiceOrderClientController, ServiceOrderEmployeeController],
+  controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],
   imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, Stock, Resource])],
   providers: [ServicesService, ServiceOrderService, StockService, ResourceService, RequestedServiceService],
 })

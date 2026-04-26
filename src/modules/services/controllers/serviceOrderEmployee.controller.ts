@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
 import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { CurrentUserId } from '../../auth/decorators/current-user';
@@ -50,6 +50,14 @@ export class ServiceOrderEmployeeController {
   async getReceivedRequestedService() {
     const requestedServices: RequestedService[] = await this.requestedServiceS.getRequestedServices(RequestedServicesStatus.RECEBIDA);
     return requestedServices;
+  }
+
+  @Get('/requested/average-duration')
+  async getAverageDuration(
+    @Query('serviceId') serviceId: string | undefined,
+  ) {
+    const id = serviceId ? Number(serviceId) : undefined;
+    return await this.requestedServiceS.getAverageServiceDuration(id);
   }
 
   @Get('/requested/me')
