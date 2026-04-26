@@ -317,14 +317,16 @@ export class RequestedServiceService {
     });
   }
 
-  async getAverageServiceDuration() {
+  async getAverageServiceDuration(serviceId?: number) {
     const requestedServices = await this.requestedServiceRepository.find({
       where: [{
         finished_at: Not(IsNull()),
+        service: { id: serviceId },
         started_at: Not(IsNull()),
         status: RequestedServicesStatus.FINALIZADA,
       }, {
         finished_at: Not(IsNull()),
+        service: { id: serviceId },
         started_at: Not(IsNull()),
         status: RequestedServicesStatus.ENTREGUE,
       }],
