@@ -231,17 +231,6 @@ export class RequestedServiceService {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
       this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
-      if (requestedService.serviceItem) {
-        for (const item of requestedService.serviceItem) {
-          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
-            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
-          }
-        }
-
-        for (const item of requestedService.serviceItem) {
-          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
-        }
-      }
 
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
@@ -300,6 +289,17 @@ export class RequestedServiceService {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
       this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APROVADO });
+      if (requestedService.serviceItem) {
+        for (const item of requestedService.serviceItem) {
+          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
+            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+          }
+        }
+
+        for (const item of requestedService.serviceItem) {
+          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
+        }
+      }
 
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });
