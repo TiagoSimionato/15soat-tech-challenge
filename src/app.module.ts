@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceConfigs } from './configs/dataSourceConfigs';
 import { AuthModule } from './modules/auth/auth.module';
+import { FallbackModule } from './modules/fallback/fallback.module';
 import { ResourcesModule } from './modules/resources/resources.module';
 import { ServicesModule } from './modules/services/services.module';
 import { StockModule } from './modules/stock/stock.module';
@@ -24,6 +25,7 @@ import { VehiclesModule } from './modules/vehicle/vehicle.module';
     StockModule,
     VehiclesModule,
     ServicesModule,
+    FallbackModule,
   ],
   providers: [],
 })
