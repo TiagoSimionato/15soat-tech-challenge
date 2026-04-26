@@ -7,6 +7,7 @@ import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { RequestedServicesStatus } from '../enums/services.types';
 import { ServiceItemDTO } from '../models/serviceItem.model';
+import { DeliverServiceOrderDTO, VehicleArrivedDTO } from '../models/serviceOrder.model';
 import { RequestedServiceService } from '../services/requestedService.service';
 import { ServiceOrderService } from '../services/serviceOrder.service';
 
@@ -127,9 +128,23 @@ export class ServiceOrderEmployeeController {
   @HttpCode(HttpStatus.OK)
   async deliverRequestedService(
     @Param('id', ParseIntPipe) id: number,
+    @Body() deliverDto: DeliverServiceOrderDTO,
   ) {
     await this.serviceOrderService.deliverServiceOrder(
       id,
+      deliverDto.vehicle_delivered_at,
+    );
+  }
+
+  @Post('/:id/vehicle-arrived')
+  @HttpCode(HttpStatus.OK)
+  async setVehicleArrived(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() arrivedDto: VehicleArrivedDTO,
+  ) {
+    await this.serviceOrderService.setVehicleArrived(
+      id,
+      arrivedDto.vehicle_arrived_at,
     );
   }
 }

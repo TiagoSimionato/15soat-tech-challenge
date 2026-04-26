@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsDateString, IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 
 export class ServiceOrderServiceDTO {
   @IsInt()
@@ -18,4 +18,14 @@ export class ServiceOrderDTO {
   @ValidateNested()
   @Type(() => ServiceOrderServiceDTO)
   services: ServiceOrderServiceDTO[];
+}
+
+export class VehicleArrivedDTO {
+  @IsDateString()
+  vehicle_arrived_at: string;
+}
+
+export class DeliverServiceOrderDTO {
+  @IsDateString()
+  vehicle_delivered_at: string;
 }
