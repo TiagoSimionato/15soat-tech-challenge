@@ -13,10 +13,10 @@ export class RequestedService {
   @Column()
   status: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   started_at: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   finished_at: Date;
 
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
