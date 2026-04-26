@@ -13,7 +13,7 @@ export class ServiceOrderService {
     @InjectRepository(ServiceOrder)
     private readonly serviceOrderRepository: Repository<ServiceOrder>,
     private readonly dataSource: DataSource,
-    private readonly requestedServiceS: RequestedServiceService,
+    private readonly requestedServices: RequestedServiceService,
   ) { }
 
   async createServiceOrder(serviceOrder: ServiceOrderDTO) {
@@ -36,7 +36,7 @@ export class ServiceOrderService {
       });
 
       const serviceOrderId: number = (await manager.save(dbServiceOrder)).id;
-      await this.requestedServiceS.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
+      await this.requestedServices.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
     });
   }
 
@@ -53,11 +53,15 @@ export class ServiceOrderService {
     return serviceOrder;
   }
 
-  async deliverServiceOrder(id: number) {
-    const serviceOrder = await this.serviceOrderRepository.findOne({ relations: ['requestedServices'], where: { id } });
+  async setVehicleArrived(id: number, vehicleArrivedAt: string) {
+    const serviceOrder = await this.getOrderDetail(id);
 
-    if (!serviceOrder)
-      throw new BadRequestException('Service order not found');
+    serviceOrder.vehicle_arrived_at = new Date(vehicleArrivedAt);
+    await this.serviceOrderRepository.save(serviceOrder);
+  }
+
+  async deliverServiceOrder(id: number, vehicleDeliveredAt: string) {
+    const serviceOrder = await this.getOrderDetail(id);
 
     const allValidStatus = serviceOrder.requestedServices.every(requestedService =>
       requestedService.status === RequestedServicesStatus.FINALIZADA || requestedService.status === RequestedServicesStatus.CANCELADO);
@@ -68,6 +72,7 @@ export class ServiceOrderService {
     if (!canDeliver)
       throw new BadRequestException('Service order cannot be delivered');
 
+    serviceOrder.vehicle_delivered_at = new Date(vehicleDeliveredAt);
     serviceOrder.status = ServiceOrderStatus.ENTREGUE;
     serviceOrder.requestedServices.forEach((requestedService) => {
       if (requestedService.status === RequestedServicesStatus.FINALIZADA) {

@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, Inject, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
 import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { DeleteResult } from 'typeorm';
@@ -37,9 +37,9 @@ export class StockController {
   }
 
   @Get('/resource/:id')
-  async listStockByResourceId(@Param() resourceId, @Res() res: Response) {
+  async listStockByResourceId(@Param('id', ParseIntPipe) resourceId: number, @Res() res: Response) {
     try {
-      const stock: null | StockResponse = await this.stockService.listStockByResourceId(resourceId.id);
+      const stock: null | StockResponse = await this.stockService.listStockByResourceId(resourceId);
       if (!stock)
         return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
@@ -51,9 +51,9 @@ export class StockController {
   }
 
   @Delete(':id')
-  async deleteStock(@Param() stockId, @Res() res: Response) {
+  async deleteStock(@Param('id', ParseIntPipe) stockId: number, @Res() res: Response) {
     try {
-      const deleted: DeleteResult = await this.stockService.deleteStock(stockId.id);
+      const deleted: DeleteResult = await this.stockService.deleteStock(stockId);
       if (deleted.affected === 0)
         return res.status(404).send({ message: 'Estoque não foi encontrado.' });
 

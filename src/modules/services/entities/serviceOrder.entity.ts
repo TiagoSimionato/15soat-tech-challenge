@@ -19,6 +19,12 @@ export class ServiceOrder {
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   cost: number;
 
+  @Column({ nullable: true, type: 'timestamptz' })
+  vehicle_arrived_at: Date;
+
+  @Column({ nullable: true, type: 'timestamptz' })
+  vehicle_delivered_at: Date;
+
   @ManyToOne(() => User, user => user.orders)
   @JoinColumn({ name: 'user_id' })
   user: User;

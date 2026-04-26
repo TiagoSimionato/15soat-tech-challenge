@@ -38,15 +38,15 @@ export class ServiceOrderClientController {
   }
 
   @Get('/requested/:id')
-  async getRequestedServiceDetail(@Param() requestedServiceId, @Res() res: Response) {
-    const requestedService: RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId.id);
+  async getRequestedServiceDetail(@Param('id', ParseIntPipe) requestedServiceId: number, @Res() res: Response) {
+    const requestedService: RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId);
     return res.status(200).send(requestedService);
   }
 
   @Get('/requested/:id/items')
-  async getServiceItemsByRequestedServiceId(@Param() requestedServiceId, @Res() res: Response) {
+  async getServiceItemsByRequestedServiceId(@Param('id', ParseIntPipe) requestedServiceId: number, @Res() res: Response) {
     try {
-      const items: null | ServiceItem[] = await this.requestedServiceS.getServiceItemsByRequestedServiceId(requestedServiceId.id);
+      const items: null | ServiceItem[] = await this.requestedServiceS.getServiceItemsByRequestedServiceId(requestedServiceId);
       return res.status(200).send(items);
     }
     catch (error) {
@@ -55,8 +55,8 @@ export class ServiceOrderClientController {
   }
 
   @Get('/:id')
-  async getOrderDetail(@Param() serviceOrderId, @Res() res: Response) {
-    const serviceOrder: ServiceOrder = await this.serviceOrderService.getOrderDetail(serviceOrderId.id);
+  async getOrderDetail(@Param('id', ParseIntPipe) serviceOrderId: number, @Res() res: Response) {
+    const serviceOrder: ServiceOrder = await this.serviceOrderService.getOrderDetail(serviceOrderId);
     return res.status(200).send(serviceOrder);
   }
 

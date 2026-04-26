@@ -18,7 +18,7 @@ export class UsersController {
   }
 
   @Get(':document')
-  async listOneUser(@Param() { document }) {
+  async listOneUser(@Param('document') document: string) {
     const user = await this.userService.listOneUser(document);
     if (!user) {
       throw new NotFoundException();
@@ -27,7 +27,7 @@ export class UsersController {
   }
 
   @Put(':document')
-  async updateUser(@Param() { document }, @Body() request: SignUpRequest) {
+  async updateUser(@Param('document') document: string, @Body() request: SignUpRequest) {
     const updateResult = await this.userService.updateUser(document, request);
     if (updateResult.affected === 0) {
       throw new NotFoundException();
@@ -35,7 +35,7 @@ export class UsersController {
   }
 
   @Delete(':document')
-  async deleteUser(@Param() { document }) {
+  async deleteUser(@Param('document') document: string) {
     const deleteResult = await this.userService.deleteUser(document);
     if (deleteResult.affected === 0) {
       throw new NotFoundException();

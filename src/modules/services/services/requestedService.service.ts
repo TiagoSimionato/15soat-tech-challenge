@@ -150,7 +150,7 @@ export class RequestedServiceService {
   private async updateServiceOrderBudget(serviceOrderId: number, manager: EntityManager) {
     const repo = manager.getRepository(ServiceOrder);
     const updatedServiceOrder = await repo.findOne({
-      relations: ['requestedService'],
+      relations: ['requestedServices'],
       where: { id: serviceOrderId },
     });
     if (updatedServiceOrder) {
