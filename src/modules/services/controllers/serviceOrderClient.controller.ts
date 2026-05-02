@@ -27,6 +27,12 @@ export class ServiceOrderClientController {
     }
   }
 
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  async getClientOrders(@CurrentUserId() clientId: number) {
+    return await this.serviceOrderService.getClientOrders(clientId);
+  }
+
   @Get('/requested/awaiting-approval')
   @HttpCode(HttpStatus.OK)
   async getAwaitingApprovalRequestedServices(
