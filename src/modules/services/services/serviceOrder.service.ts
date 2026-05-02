@@ -44,6 +44,13 @@ export class ServiceOrderService {
     return await this.serviceOrderRepository.find({ relations: ['vehicle', 'user', 'requestedServices'] });
   }
 
+  async getClientOrders(clientId: number): Promise<ServiceOrder[]> {
+    return await this.serviceOrderRepository.find({
+      relations: ['vehicle', 'user', 'requestedServices'],
+      where: { user: { id: clientId } },
+    });
+  }
+
   async getOrderDetail(id: number): Promise<ServiceOrder> {
     const serviceOrder = await this.serviceOrderRepository.findOne({ relations: ['vehicle', 'user', 'requestedServices'], where: { id } });
 
