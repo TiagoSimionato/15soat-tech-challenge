@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { LegalNature } from 'src/modules/users/enums/legalNature';
+import { LegalNature } from '../../users/enums/legalNature';
 
 type UserConstructor = {
   document: string;

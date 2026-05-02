@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { isValidPlate } from 'src/modules/vehicle/utils/isValidPlate';
 import { Repository } from 'typeorm';
+import { isValidPlate } from '../../vehicle/utils/isValidPlate';
 import { Vehicle } from '../entities/vehicle.entity';
 import { VehicleDTO } from '../models/vehicle.model';
 

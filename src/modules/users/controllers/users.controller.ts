@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, NotFoundException, Param, Put } from '@nestjs/common';
-import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
-import { Roles } from 'src/modules/auth/enums/roles.enum';
+import { RequireRoles } from '../../auth/decorators/role.decorator';
+import { Roles } from '../../auth/enums/roles.enum';
 import { SignUpRequest } from '../../auth/requests/signUp.model';
 import { UserService } from '../services/users.service';
 

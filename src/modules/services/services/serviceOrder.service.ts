@@ -31,7 +31,7 @@ export class ServiceOrderService {
           id: user.id,
         },
         vehicle: {
-          id: serviceOrder.vehicleId,
+          id: serviceOrder.vehicle_id,
         },
       });
 

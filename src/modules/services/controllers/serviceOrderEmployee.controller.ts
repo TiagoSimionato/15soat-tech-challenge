@@ -1,8 +1,8 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
-import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
-import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { CurrentUserId } from '../../auth/decorators/current-user';
+import { RequireRoles } from '../../auth/decorators/role.decorator';
+import { Roles } from '../../auth/enums/roles.enum';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
 import { RequestedServicesStatus } from '../enums/services.types';

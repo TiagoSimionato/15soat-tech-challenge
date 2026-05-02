@@ -12,7 +12,7 @@ export class ServiceOrderDTO {
   userDocument: string;
 
   @IsInt()
-  vehicleId: number;
+  vehicle_id: number;
 
   @IsNotEmpty()
   @ValidateNested()
