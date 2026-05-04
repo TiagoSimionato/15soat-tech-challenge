@@ -1,9 +1,9 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put, Res } from '@nestjs/common';
-import { RequireRoles } from 'src/modules/auth/decorators/role.decorator';
-import { Roles } from 'src/modules/auth/enums/roles.enum';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
+import { RequireRoles } from '../../auth/decorators/role.decorator';
+import { Roles } from '../../auth/enums/roles.enum';
 import { Resource } from '../entities/resources.entity';
 import { ResourcesByService } from '../entities/resourcesByService.entity';
 import { ResourceDTO } from '../models/resource.model';

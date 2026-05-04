@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        command: [lint, tsc]
+        command: [lint, tsc, test]
     steps:
       - uses: actions/checkout@v4
         with:

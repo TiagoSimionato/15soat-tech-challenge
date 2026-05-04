@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Resource } from 'src/modules/resources/entities/resources.entity';
-import { ResourcesByService } from 'src/modules/resources/entities/resourcesByService.entity';
-import { ResourceService } from 'src/modules/resources/services/resources.service';
-import { Stock } from 'src/modules/stock/entities/stock.entity';
-import { StockResponse } from 'src/modules/stock/models/stock.model';
-import { StockService } from 'src/modules/stock/services/stock.service';
 import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
+import { Resource } from '../../resources/entities/resources.entity';
+import { ResourcesByService } from '../../resources/entities/resourcesByService.entity';
+import { ResourceService } from '../../resources/services/resources.service';
+import { Stock } from '../../stock/entities/stock.entity';
+import { StockResponse } from '../../stock/models/stock.model';
+import { StockService } from '../../stock/services/stock.service';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
