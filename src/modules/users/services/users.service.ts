@@ -16,7 +16,12 @@ export class UserService {
   ) {}
 
   async findOne(username: string): Promise<null | User> {
-    return await this.usersRepository.findOne({ relations: ['roles'], where: { username } });
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'roles')
+      .addSelect('user.password')
+      .where('user.username = :username', { username })
+      .getOne();
   }
 
   async create(signUpRequest: SignUpRequest) {
