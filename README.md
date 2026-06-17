@@ -29,8 +29,10 @@ npm run dev
 
 ## Running project with docker compose
 
+Use `DB_HOST=db` with this docker compose file, then run:
+
 ```bash
-docker compose --env-file .env up -d --build
+docker compose --env-file .env up -d
 ```
 
 ## Swagger / OpenAPI Docs

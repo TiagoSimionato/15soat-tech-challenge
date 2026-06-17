@@ -1,0 +1,6 @@
+dist
+coverage
+.scannerwork
+.github
+.gitignore
+/*.md
