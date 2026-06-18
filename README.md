@@ -65,6 +65,14 @@ $ npm run test:cov
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
+## Deployment
+
+In order to kubernetes be able to download from a private container registry, create the necessary secret
+
+```bash
+kubectl create secret docker-registry ghcr-secrets --docker-server=https://ghcr.io --docker-username=[YOUR_USERNAME] --docker-password=[YOUR_PASSWORD]
+```
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
