@@ -20,7 +20,7 @@ spec:
         - name: ghcr-secrets
       containers:
         - name: c-15soat-tech-challenge
-          image: ghcr.io/tiagosimionato/15soat-tech-challenge:sha-76dddb7
+          image: ghcr.io/tiagosimionato/15soat-tech-challenge:tag
           resources:
             requests:
               cpu: 1
