@@ -4,3 +4,5 @@ coverage
 .github
 .gitignore
 /*.md
+k8s
+docker-compose.yml
