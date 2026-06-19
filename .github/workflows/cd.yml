@@ -56,5 +56,7 @@ jobs:
 
       - name: Replace lastest deployment tag and update cluster
         run: |
-          sed -i "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${{ github.repository }}:sha-$(echo ${{ github.sha }} | cut -c 1-7)|" k8s/deployment.yml
+          REPOSITORY=$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/')
+          TAG=$(echo ${{ github.sha }} | cut -c 1-7)
+          sed -i "s|image: ghcr.io/${REPOSITORY}:.*|image: ghcr.io/${REPOSITORY}:sha-${TAG}|" k8s/deployment.yml
           kubectl apply -f k8s/deployment.yml
