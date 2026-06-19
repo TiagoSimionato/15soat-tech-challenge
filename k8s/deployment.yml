@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-15soat-tech-challenge
+  labels:
+    app: app-15soat-tech-challenge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-15soat-tech-challenge
+  template:
+    metadata:
+      name: app-15soat-tech-challenge
+      labels:
+        app: app-15soat-tech-challenge
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-secrets
+      containers:
+        - name: c-15soat-tech-challenge
+          image: ghcr.io/tiagosimionato/15soat-tech-challenge:sha-76dddb7
+          resources:
+            requests:
+              cpu: 1
+              memory: 100Mi
+              ephemeral-storage: "2Gi"
+            limits:
+              cpu: 2
+              memory: 100Mi
+          ports:
+            - containerPort: 3000
+          env:
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: DB_NAME
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: DB_USER
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: DB_PASSWORD
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: DB_PORT
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: JWT_SECRET
