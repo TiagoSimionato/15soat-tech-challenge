@@ -15,3 +15,23 @@ resource "kubernetes_secret" "app-secrets" {
     JWT_SECRET        = var.jwt_secret
   }
 }
+
+resource "kubernetes_secret" "ghcr-secrets" {
+  metadata {
+    name      = "ghcr-secrets"
+    namespace = kubernetes_namespace.app.metadata[0].name
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "https://ghcr.io" = {
+          username = var.ghcr_username
+          password = var.ghcr_token
+        }
+      }
+    })
+  }
+}
