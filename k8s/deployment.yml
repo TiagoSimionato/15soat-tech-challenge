@@ -4,6 +4,7 @@ metadata:
   name: app-15soat-tech-challenge
   labels:
     app: app-15soat-tech-challenge
+  namespace: soat-grupo76
 spec:
   replicas: 1
   selector:

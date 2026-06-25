@@ -2,6 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: hpa-app-15soat-tech-challenge
+  namespace: soat-grupo76
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
