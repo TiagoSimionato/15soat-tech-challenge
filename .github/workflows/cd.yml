@@ -53,6 +53,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Terraform Init and Apply
+        env:
+          TF_VAR_postgres_user:     ${{ secrets.DB_USER }}
+          TF_VAR_postgres_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_postgres_db:       ${{ vars.DB_NAME }}
+          TF_VAR_jwt_secret:        ${{ secrets.JWT_SECRET }}
+        run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
+
+      - name: Load image into Kind
+        run: |
+          REPOSITORY=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          TAG=$(echo "${{ github.sha }}" | cut -c 1-7)
+          docker pull ghcr.io/${REPOSITORY}:sha-${TAG}
+          kind load docker-image ghcr.io/${REPOSITORY}:sha-${TAG} --name soat-cluster
+
       - name: Replace lastest deployment tag and update cluster
         run: |
           REPOSITORY=$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/')

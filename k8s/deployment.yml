@@ -4,6 +4,7 @@ metadata:
   name: app-15soat-tech-challenge
   labels:
     app: app-15soat-tech-challenge
+  namespace: soat-grupo76
 spec:
   replicas: 1
   selector:
@@ -36,17 +37,17 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: secrets-15soat-tech-challenge
-                key: DB_NAME
+                key: POSTGRES_DB
           - name: DB_USER
             valueFrom:
               secretKeyRef:
                 name: secrets-15soat-tech-challenge
-                key: DB_USER
+                key: POSTGRES_USER
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: secrets-15soat-tech-challenge
-                key: DB_PASSWORD
+                key: POSTGRES_PASSWORD
           - name: DB_HOST
             valueFrom:
               secretKeyRef:

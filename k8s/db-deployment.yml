@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-15soat-tech-challenge
+  labels:
+    app: db-15soat-tech-challenge
+  namespace: soat-grupo76
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-15soat-tech-challenge
+  template:
+    metadata:
+      name: db-15soat-tech-challenge
+      labels:
+        app: db-15soat-tech-challenge
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: postgres
+          image: postgres:18
+          resources:
+            requests:
+              cpu: 0.5
+              memory: 100Mi
+              ephemeral-storage: "2Gi"
+            limits:
+              memory: 100Mi
+          ports:
+            - containerPort: 5432
+          env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: secrets-15soat-tech-challenge
+                key: POSTGRES_DB

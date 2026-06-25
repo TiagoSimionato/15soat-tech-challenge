@@ -2,10 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: db-svc-15soat-tech-challenge
+  namespace: soat-grupo76
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
-    - port: 5432
+    - protocol: TCP
+      port: 5432
       targetPort: 5432
   selector:
     app: db-15soat-tech-challenge

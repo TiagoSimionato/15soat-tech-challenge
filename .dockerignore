@@ -6,3 +6,4 @@ coverage
 /*.md
 k8s
 docker-compose.yml
+infra
