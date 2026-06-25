@@ -13,5 +13,5 @@ variable "image" {
 variable "postgres_user"     {}
 variable "postgres_password" {}
 variable "postgres_db"       {}
-variable "db_host"           { default = "postgres" }
+variable "db_host"           { default = "db-svc-15soat-tech-challenge" }
 variable "db_port"           { default = "5432" }

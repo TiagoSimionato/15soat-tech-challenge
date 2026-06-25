@@ -61,8 +61,7 @@ jobs:
           TF_VAR_postgres_user:     ${{ secrets.DB_USER }}
           TF_VAR_postgres_password: ${{ secrets.DB_PASSWORD }}
           TF_VAR_postgres_db:       ${{ vars.DB_NAME }}
-          TF_VAR_db_host:           ${{ vars.DB_HOST }}
-        run: terraform -chdir=terraform init && terraform -chdir=terraform apply -auto-approve
+        run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
 
       - name: Load image into Kind
         run: |

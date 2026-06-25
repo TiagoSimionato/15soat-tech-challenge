@@ -6,4 +6,4 @@ coverage
 /*.md
 k8s
 docker-compose.yml
-terraform
+infra
