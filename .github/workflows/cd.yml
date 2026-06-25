@@ -63,7 +63,7 @@ jobs:
           TF_VAR_postgres_db:       ${{ vars.DB_NAME }}
           TF_VAR_jwt_secret:        ${{ secrets.JWT_SECRET }}
           TF_VAR_ghcr_username:     ${{ secrets.GHCR_USER }}
-          TF_VAR_ghcr_password:     ${{ secrets.GHCR_TOKEN }}
+          TF_VAR_ghcr_token:        ${{ secrets.GHCR_TOKEN }}
         run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
 
       - name: Replace lastest deployment tag and update cluster
