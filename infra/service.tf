@@ -28,8 +28,8 @@ resource "kubernetes_service" "app" {
     selector = { app = "app-15soat-tech-challenge" }
 
     port {
-      port        = 3000
-      target_port = 3000
+      port        = 30000
+      target_port = 30000
     }
 
     type = "NodePort"
