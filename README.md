@@ -96,9 +96,28 @@ Terraform is responsible for:
 
 ### Steps
 
+1. Go to the `infra` directory
+
 ```bash
 
 cd infra
+
+```
+
+2. Create a file named `terraform.tfvars` with the values for the required variables
+
+```bash
+
+postgres_user     = "********"
+postgres_password = "********"
+postgres_db       = "********"
+jwt_secret        = "********"
+
+```
+
+3. Run
+
+```bash
 
 terraform init
 
@@ -113,8 +132,6 @@ kubectl get pods
 
 kubectl get svc
 ```
-
-
 
 ## Description
 
