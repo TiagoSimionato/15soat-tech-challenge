@@ -12,5 +12,6 @@ resource "kubernetes_secret" "app-secrets" {
     POSTGRES_PASSWORD = var.postgres_password
     DB_HOST           = var.db_host
     DB_PORT           = var.db_port
+    JWT_SECRET        = var.jwt_secret
   }
 }
