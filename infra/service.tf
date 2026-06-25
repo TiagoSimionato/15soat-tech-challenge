@@ -30,6 +30,7 @@ resource "kubernetes_service" "app" {
     port {
       port        = 3000
       target_port = 3000
+      node_port   = 30000
     }
 
     type = "NodePort"
