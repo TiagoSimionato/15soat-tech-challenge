@@ -8,12 +8,12 @@ resource "kubernetes_deployment" "db" {
     replicas = 1
 
     selector {
-      match_labels = { app = "postgres" }
+      match_labels = { app = "db-15soat-tech-challenge" }
     }
 
     template {
       metadata {
-        labels = { app = "postgres" }
+        labels = { app = "db-15soat-tech-challenge" }
       }
 
       spec {
