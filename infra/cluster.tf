@@ -8,6 +8,11 @@ resource "kind_cluster" "main" {
 
     node {
       role = "control-plane"
+      extra_port_mappings {
+        container_port = 30000
+        host_port      = 3000
+        protocol       = "TCP"
+      }
     }
 
     node {
