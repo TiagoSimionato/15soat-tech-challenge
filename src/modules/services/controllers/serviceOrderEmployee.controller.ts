@@ -46,6 +46,12 @@ export class ServiceOrderEmployeeController {
     }
   }
 
+  @Get('/requested/ongoing')
+  async getOnGoingRequestedServices() {
+    const requestedServices: RequestedService[] = await this.requestedServiceS.getOnGoingRequestedServices();
+    return requestedServices;
+  }
+
   @Get('/requested/received')
   async getReceivedRequestedService() {
     const requestedServices: RequestedService[] = await this.requestedServiceS.getRequestedServices(RequestedServicesStatus.RECEBIDA);

@@ -128,6 +128,34 @@ export class RequestedServiceService {
     return await this.requestedServiceRepository.find({ relations: ['service', 'serviceOrder', 'serviceItem'], where: { employee: { id: employeeId } } });
   }
 
+  async getOnGoingRequestedServices(): Promise<RequestedService[]> {
+    return await this.requestedServiceRepository
+      .createQueryBuilder('requestedService')
+      .leftJoinAndSelect('requestedService.service', 'service')
+      .leftJoinAndSelect('requestedService.serviceOrder', 'serviceOrder')
+      .leftJoinAndSelect('requestedService.serviceItem', 'serviceItem')
+      .where('requestedService.status not in (:...statuses)', {
+        statuses: [
+          RequestedServicesStatus.FINALIZADA,
+          RequestedServicesStatus.CANCELADO,
+          RequestedServicesStatus.ENTREGUE,
+        ],
+      })
+      .orderBy(
+        `CASE "requestedService"."status"
+          WHEN 'EM EXECUÇÃO' THEN 1
+          WHEN 'APROVADO' THEN 2
+          WHEN 'AGUARDANDO APROVAÇÃO' THEN 3
+          WHEN 'EM DIAGNÓSTICO' THEN 4
+          WHEN 'RECEBIDA' THEN 5
+        ELSE 6
+        END`,
+        'ASC',
+      )
+      .addOrderBy('"requestedService"."id"', 'ASC')
+      .getMany();
+  }
+
   private async updateRequestedServiceCost(requestedServiceId: number, manager: EntityManager) {
     const repo = manager ? manager.getRepository(RequestedService) : this.requestedServiceRepository;
     const itemsOfRequestedService: ServiceItem[] = await this.getServiceItemsByRequestedServiceId(requestedServiceId, manager);
