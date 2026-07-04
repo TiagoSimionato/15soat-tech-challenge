@@ -20,7 +20,7 @@ export class ServiceOrderClientController {
   async createServiceOrder(@Body() order: ServiceOrderDTO, @Res() res: Response) {
     try {
       const serviceOrderId = await this.serviceOrderService.createServiceOrder(order);
-      return res.status(201).send({ message: 'Ordem de serviço criada com sucesso.', id: serviceOrderId });
+      return res.status(201).send({ id: serviceOrderId, message: 'Ordem de serviço criada com sucesso.' });
     }
     catch (error) {
       return res.status(500).send({ message: error });
