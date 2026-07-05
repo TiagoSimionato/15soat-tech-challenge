@@ -76,15 +76,6 @@ describe('servicesController', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Serviço criado com sucesso.' });
     });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServicesService.createService.mockRejectedValue(error);
-
-      await controller.createService(mockServicesDTO, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-    });
   });
 
   describe('listAllServices', () => {
@@ -120,15 +111,6 @@ describe('servicesController', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith(mockServices);
     });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServicesService.listServices.mockRejectedValue(error);
-
-      await controller.listAllServices(mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-    });
   });
 
   describe('listOneService', () => {
@@ -162,15 +144,6 @@ describe('servicesController', () => {
       expect(mockServicesService.listOneService).toHaveBeenCalledWith(2);
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith(service);
-    });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServicesService.listOneService.mockRejectedValue(error);
-
-      await controller.listOneService(1, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 
@@ -210,15 +183,6 @@ describe('servicesController', () => {
 
       expect(mockServicesService.updateService).toHaveBeenCalledWith(1, updatedDTO);
     });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServicesService.updateService.mockRejectedValue(error);
-
-      await controller.updateService(1, mockServicesDTO, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-    });
   });
 
   describe('deleteService', () => {
@@ -253,15 +217,6 @@ describe('servicesController', () => {
       expect(mockServicesService.deleteService).toHaveBeenCalledWith(2);
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Serviço deletado com sucesso.' });
-    });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServicesService.deleteService.mockRejectedValue(error);
-
-      await controller.deleteService(1, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 

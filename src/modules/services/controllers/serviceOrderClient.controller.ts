@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
-import { CurrentUserId } from '../../auth/decorators/current-user';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';
@@ -18,13 +18,8 @@ export class ServiceOrderClientController {
 
   @Post()
   async createServiceOrder(@Body() order: ServiceOrderDTO, @Res() res: Response) {
-    try {
-      const serviceOrderId = await this.serviceOrderService.createServiceOrder(order);
-      return res.status(201).send({ id: serviceOrderId, message: 'Ordem de serviço criada com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const serviceOrderId = await this.serviceOrderService.createServiceOrder(order);
+    return res.status(201).send({ id: serviceOrderId, message: 'Ordem de serviço criada com sucesso.' });
   }
 
   @Get('me')
@@ -51,13 +46,8 @@ export class ServiceOrderClientController {
 
   @Get('/requested/:id/items')
   async getServiceItemsByRequestedServiceId(@Param('id', ParseIntPipe) requestedServiceId: number, @Res() res: Response) {
-    try {
-      const items: null | ServiceItem[] = await this.requestedServiceS.getServiceItemsByRequestedServiceId(requestedServiceId);
-      return res.status(200).send(items);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const items: null | ServiceItem[] = await this.requestedServiceS.getServiceItemsByRequestedServiceId(requestedServiceId);
+    return res.status(200).send(items);
   }
 
   @Get('/:id')
