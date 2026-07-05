@@ -16,7 +16,7 @@ export class ServiceOrderService {
     private readonly requestedServices: RequestedServiceService,
   ) { }
 
-  async createServiceOrder(serviceOrder: ServiceOrderDTO) {
+  async createServiceOrder(serviceOrder: ServiceOrderDTO): Promise<number> {
     return this.dataSource.transaction(async (manager) => {
       const user = await manager.findOne(User, { where: { document: serviceOrder.userDocument } });
 
@@ -37,6 +37,7 @@ export class ServiceOrderService {
 
       const serviceOrderId: number = (await manager.save(dbServiceOrder)).id;
       await this.requestedServices.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
+      return serviceOrderId;
     });
   }
 
