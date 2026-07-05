@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
-import { CurrentUserId } from '../../auth/decorators/current-user';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { RequestedService } from '../entities/requestedService.entity';
 import { ServiceItem } from '../entities/serviceItem.entity';
 import { ServiceOrder } from '../entities/serviceOrder.entity';

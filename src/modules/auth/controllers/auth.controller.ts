@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { Public } from '../decorators/public';
+import { Public } from '../decorators/public.decorator';
 import { SignInRequest } from '../requests/signIn.model';
 import { SignUpRequest } from '../requests/signUp.model';
 import { AuthService } from '../services/auth.service';

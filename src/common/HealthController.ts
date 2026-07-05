@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { Public } from '../modules/auth/decorators/public';
+import { Public } from '../modules/auth/decorators/public.decorator';
 
 @Controller({ path: 'health' })
 export class HealthController {

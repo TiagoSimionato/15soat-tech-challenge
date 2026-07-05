@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { CurrentUserId } from '../../auth/decorators/current-user';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { VehicleDTO } from '../models/vehicle.model';
 import { VehicleService } from '../services/vehicle.service';
 
