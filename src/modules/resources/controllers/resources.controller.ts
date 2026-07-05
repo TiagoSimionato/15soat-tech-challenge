@@ -20,13 +20,8 @@ export class ResourcesController {
 
   @Post()
   async createResource(@Body() resource: ResourceDTO, @Res() res: Response) {
-    try {
-      await this.resourceService.createResource(resource);
-      return res.status(201).send({ message: 'Recurso criado com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    await this.resourceService.createResource(resource);
+    return res.status(201).send({ message: 'Recurso criado com sucesso.' });
   }
 
   @Post('/:resourceId/service/:serviceId')
@@ -36,107 +31,67 @@ export class ResourcesController {
     @Body() resourceQuantity: ResourceByServiceDTO,
     @Res() res: Response,
   ) {
-    try {
-      await this.resourceService.createResourceForService(serviceId, resourceId, resourceQuantity.min_quantity);
-      return res.status(201).send({ message: 'Recurso vínculado ao serviço com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    await this.resourceService.createResourceForService(serviceId, resourceId, resourceQuantity.min_quantity);
+    return res.status(201).send({ message: 'Recurso vínculado ao serviço com sucesso.' });
   }
 
   @Get()
   async listAllResources(@Res() res: Response) {
-    try {
-      const arrResources: Resource[] = await this.resourceService.listResources();
-      return res.status(200).send(arrResources);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const arrResources: Resource[] = await this.resourceService.listResources();
+    return res.status(200).send(arrResources);
   }
 
   @Get('/service/:id')
   async listResourcesOfAService(@Param('id', ParseIntPipe) serviceId: number, @Res() res: Response) {
-    try {
-      const resources: null | ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId);
-      if (!resources)
-        return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
+    const resources: null | ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId);
+    if (!resources)
+      return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
-      return res.status(200).send(resources);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    return res.status(200).send(resources);
   }
 
   @Get(':id')
   async listOneResource(@Param('id', ParseIntPipe) resourceId: number, @Res() res: Response) {
-    try {
-      const resource: null | Resource = await this.resourceService.listOneResource(resourceId);
-      if (!resource)
-        return res.status(404).send({ message: 'Recurso não foi encontrado.' });
+    const resource: null | Resource = await this.resourceService.listOneResource(resourceId);
+    if (!resource)
+      return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
-      return res.status(200).send(resource);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    return res.status(200).send(resource);
   }
 
   @Put(':id')
   async updateResource(@Param('id', ParseIntPipe) resourceId: number, @Body() resource: ResourceDTO, @Res() res: Response) {
-    try {
-      const update: UpdateResult = await this.resourceService.updateResource(resourceId, resource);
-      if (update.affected === 0)
-        return res.status(404).send({ message: 'Recurso não foi encontrado.' });
+    const update: UpdateResult = await this.resourceService.updateResource(resourceId, resource);
+    if (update.affected === 0)
+      return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
-      res.status(201).send({ message: 'Recurso atualizado com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    res.status(201).send({ message: 'Recurso atualizado com sucesso.' });
   }
 
   @Put('service/:id')
   async updateResourceQuantityOfAService(@Param('id', ParseIntPipe) resourceServiceId: number, @Body() resourceQuantity: ResourceByServiceDTO, @Res() res: Response) {
-    try {
-      const update: UpdateResult = await this.resourceService.updateResourceQuantityOfAService(resourceServiceId, resourceQuantity.min_quantity);
-      if (update.affected === 0)
-        return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
+    const update: UpdateResult = await this.resourceService.updateResourceQuantityOfAService(resourceServiceId, resourceQuantity.min_quantity);
+    if (update.affected === 0)
+      return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
-      res.status(201).send({ message: 'Quantidade de recurso atualizada com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    res.status(201).send({ message: 'Quantidade de recurso atualizada com sucesso.' });
   }
 
   @Delete(':id')
   async deleteResource(@Param('id', ParseIntPipe) resourceId: number, @Res() res: Response) {
-    try {
-      const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId);
-      if (deleted.affected === 0)
-        return res.status(404).send({ message: 'Recurso não foi encontrado.' });
+    const deleted: DeleteResult = await this.resourceService.deleteResource(resourceId);
+    if (deleted.affected === 0)
+      return res.status(404).send({ message: 'Recurso não foi encontrado.' });
 
-      return res.status(200).send({ message: 'Recurso deletado com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    return res.status(200).send({ message: 'Recurso deletado com sucesso.' });
   }
 
   @Delete('/service/:id')
   async deleteResourceOfAService(@Param('id', ParseIntPipe) resourceServiceId: number, @Res() res: Response) {
-    try {
-      const deleted: DeleteResult = await this.resourceService.deleteResourceOfAService(resourceServiceId);
-      if (deleted.affected === 0)
-        return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
+    const deleted: DeleteResult = await this.resourceService.deleteResourceOfAService(resourceServiceId);
+    if (deleted.affected === 0)
+      return res.status(404).send({ message: 'Recursos não foram encontrados para o serviço solicitado.' });
 
-      return res.status(200).send({ message: 'Recurso do serviço deletado com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    return res.status(200).send({ message: 'Recurso do serviço deletado com sucesso.' });
   }
 }

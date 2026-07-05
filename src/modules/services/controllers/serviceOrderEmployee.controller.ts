@@ -22,13 +22,8 @@ export class ServiceOrderEmployeeController {
 
   @Get()
   async getOrders(@Res() res: Response) {
-    try {
-      const servicesOrder: null | ServiceOrder[] = await this.serviceOrderService.getOrders();
-      return res.status(200).send(servicesOrder);
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    const servicesOrder: null | ServiceOrder[] = await this.serviceOrderService.getOrders();
+    return res.status(200).send(servicesOrder);
   }
 
   @Post('/item')
@@ -37,13 +32,8 @@ export class ServiceOrderEmployeeController {
     @Res() res: Response,
     @CurrentUserId() employeeId: number,
   ) {
-    try {
-      await this.requestedServiceS.upsertItemOnRequestedService(item, employeeId);
-      return res.status(201).send({ message: 'Item vínculado ao serviço com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    await this.requestedServiceS.upsertItemOnRequestedService(item, employeeId);
+    return res.status(201).send({ message: 'Item vínculado ao serviço com sucesso.' });
   }
 
   @Get('/requested/ongoing')
@@ -81,13 +71,8 @@ export class ServiceOrderEmployeeController {
     @Res() res: Response,
     @CurrentUserId() employeeId: number,
   ) {
-    try {
-      await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId, serviceItemId, employeeId);
-      return res.status(200).send({ message: 'Item deletado com sucesso.' });
-    }
-    catch (error) {
-      return res.status(500).send({ message: error });
-    }
+    await this.requestedServiceS.deleteRequestedServiceItem(requestedServiceId, serviceItemId, employeeId);
+    return res.status(200).send({ message: 'Item deletado com sucesso.' });
   }
 
   @Post('/requested/:requestedServiceId/assign')
