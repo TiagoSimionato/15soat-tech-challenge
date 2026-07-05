@@ -226,6 +226,77 @@ describe('RequestedServiceService', () => {
       );
     });
   });
+  describe('getOnGoingRequestedServices', () => {
+    const makeQueryBuilder = (result: RequestedService[]) => {
+      const queryBuilder: any = {
+        addOrderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(result as never),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+      };
+      return queryBuilder;
+    };
+
+    it('should return ongoing requested services ordered by status priority', async () => {
+      const rs = [
+        makeRequestedService(RequestedServicesStatus.EM_EXECUCAO),
+        makeRequestedService(RequestedServicesStatus.RECEBIDA),
+      ];
+      const queryBuilder = makeQueryBuilder(rs);
+      requestedServiceRepo.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(queryBuilder);
+
+      const result = await service.getOnGoingRequestedServices();
+
+      expect(requestedServiceRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'requestedService',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'requestedService.service',
+        'service',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'requestedService.serviceOrder',
+        'serviceOrder',
+      );
+      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'requestedService.serviceItem',
+        'serviceItem',
+      );
+      expect(queryBuilder.where).toHaveBeenCalledWith(
+        'requestedService.status not in (:...statuses)',
+        {
+          statuses: [
+            RequestedServicesStatus.FINALIZADA,
+            RequestedServicesStatus.CANCELADO,
+            RequestedServicesStatus.ENTREGUE,
+          ],
+        },
+      );
+      expect(queryBuilder.orderBy).toHaveBeenCalledWith(
+        expect.stringContaining('CASE "requestedService"."status"'),
+        'ASC',
+      );
+      expect(queryBuilder.addOrderBy).toHaveBeenCalledWith(
+        '"requestedService"."id"',
+        'ASC',
+      );
+      expect(result).toEqual(rs);
+    });
+
+    it('should return empty array when there are no ongoing requested services', async () => {
+      const queryBuilder = makeQueryBuilder([]);
+      requestedServiceRepo.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(queryBuilder);
+
+      const result = await service.getOnGoingRequestedServices();
+
+      expect(result).toEqual([]);
+    });
+  });
   describe('getEmployeeRequestedServices', () => {
     it('should return requested services for an employee', async () => {
       const rs = [makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO)];

@@ -25,6 +25,7 @@ describe('serviceOrderEmployeeController', () => {
     finishRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
     getAverageServiceDuration: jest.fn<(serviceId?: number) => Promise<any>>(),
     getEmployeeRequestedServices: jest.fn<(employeeId: number) => Promise<RequestedService[]>>(),
+    getOnGoingRequestedServices: jest.fn<() => Promise<RequestedService[]>>(),
     getRequestedServices: jest.fn<(status: RequestedServicesStatus) => Promise<RequestedService[]>>(),
     reviewRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
     startRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
@@ -143,6 +144,26 @@ describe('serviceOrderEmployeeController', () => {
       await controller.upsertItemOnRequestedService(serviceItemDTO, mockResponse, employeeId);
 
       expect(mockResponse.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('getOnGoingRequestedServices', () => {
+    it('should return ongoing requested services', async () => {
+      const mockServices = [mockRequestedService];
+      mockRequestedServiceService.getOnGoingRequestedServices.mockResolvedValue(mockServices);
+
+      const result = await controller.getOnGoingRequestedServices();
+
+      expect(mockRequestedServiceService.getOnGoingRequestedServices).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockServices);
+    });
+
+    it('should return empty array when no ongoing services exist', async () => {
+      mockRequestedServiceService.getOnGoingRequestedServices.mockResolvedValue([]);
+
+      const result = await controller.getOnGoingRequestedServices();
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -343,6 +364,7 @@ describe('serviceOrderEmployeeController', () => {
       expect(controller.getReceivedRequestedService).toBeDefined();
       expect(controller.getAverageDuration).toBeDefined();
       expect(controller.getEmployeeRequestedService).toBeDefined();
+      expect(controller.getOnGoingRequestedServices).toBeDefined();
       expect(controller.deleteRequestedServiceItem).toBeDefined();
       expect(controller.assignRequestedServiceToEmployee).toBeDefined();
       expect(controller.reviewRequestedService).toBeDefined();
