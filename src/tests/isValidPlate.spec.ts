@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { isValidPlate } from '../modules/vehicle/utils/isValidPlate';
 
 describe('isValidPlate', () => {
