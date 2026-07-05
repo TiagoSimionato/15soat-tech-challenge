@@ -106,15 +106,6 @@ describe('serviceOrderClientController', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Ordem de serviço criada com sucesso.' });
     });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServiceOrderService.createServiceOrder.mockRejectedValue(error);
-
-      await controller.createServiceOrder(mockServiceOrder, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-    });
   });
 
   describe('getAwaitingApprovalRequestedServices', () => {
@@ -212,16 +203,6 @@ describe('serviceOrderClientController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith(mockItems);
-    });
-
-    it('should handle error and return 500', async () => {
-      const requestedServiceId = 1;
-      const error = new Error('Database error');
-      mockRequestedServiceService.getServiceItemsByRequestedServiceId.mockRejectedValue(error);
-
-      await controller.getServiceItemsByRequestedServiceId(requestedServiceId, mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 

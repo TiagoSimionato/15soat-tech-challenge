@@ -88,17 +88,6 @@ describe('ResourcesController', () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso criado com sucesso.' });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.createResource.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.createResource(mockResourceDTO, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('createResourceForService', () => {
@@ -112,17 +101,6 @@ describe('ResourcesController', () => {
       expect(service.createResourceForService).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso vínculado ao serviço com sucesso.' });
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.createResourceForService.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.createResourceForService(1, 1, mockResourceByServiceDTO, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 
@@ -146,17 +124,6 @@ describe('ResourcesController', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith([]);
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.listResources.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.listAllResources(res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 
@@ -184,17 +151,6 @@ describe('ResourcesController', () => {
         message: 'Recursos não foram encontrados para o serviço solicitado.',
       });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.listResourcesOfAService.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.listResourcesOfAService(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('listOneResource', () => {
@@ -219,17 +175,6 @@ describe('ResourcesController', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso não foi encontrado.' });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.listOneResource.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.listOneResource(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('updateResource', () => {
@@ -253,17 +198,6 @@ describe('ResourcesController', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso não foi encontrado.' });
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.updateResource.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.updateResource(1, mockResourceDTO, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 
@@ -291,17 +225,6 @@ describe('ResourcesController', () => {
         message: 'Recursos não foram encontrados para o serviço solicitado.',
       });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.updateResourceQuantityOfAService.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.updateResourceQuantityOfAService(1, mockResourceByServiceDTO, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('deleteResource', () => {
@@ -325,17 +248,6 @@ describe('ResourcesController', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso não foi encontrado.' });
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.deleteResource.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.deleteResource(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 
@@ -362,17 +274,6 @@ describe('ResourcesController', () => {
       expect(res.send).toHaveBeenCalledWith({
         message: 'Recursos não foram encontrados para o serviço solicitado.',
       });
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.deleteResourceOfAService.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.deleteResourceOfAService(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 });

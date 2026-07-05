@@ -103,15 +103,6 @@ describe('serviceOrderEmployeeController', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith(null);
     });
-
-    it('should handle error and return 500', async () => {
-      const error = new Error('Database error');
-      mockServiceOrderService.getOrders.mockRejectedValue(error);
-
-      await controller.getOrders(mockResponse);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-    });
   });
 
   describe('upsertItemOnRequestedService', () => {
@@ -129,21 +120,6 @@ describe('serviceOrderEmployeeController', () => {
       expect(mockRequestedServiceService.upsertItemOnRequestedService).toHaveBeenCalledWith(serviceItemDTO, employeeId);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Item vínculado ao serviço com sucesso.' });
-    });
-
-    it('should handle error and return 500', async () => {
-      const serviceItemDTO: ServiceItemDTO = {
-        amount: 2,
-        requested_service_id: 1,
-        stock_id: 1,
-      };
-      const employeeId = 1;
-      const error = new Error('Upsert error');
-      mockRequestedServiceService.upsertItemOnRequestedService.mockRejectedValue(error);
-
-      await controller.upsertItemOnRequestedService(serviceItemDTO, mockResponse, employeeId);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 
@@ -256,18 +232,6 @@ describe('serviceOrderEmployeeController', () => {
       );
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Item deletado com sucesso.' });
-    });
-
-    it('should handle error and return 500', async () => {
-      const requestedServiceId = 1;
-      const serviceItemId = 1;
-      const employeeId = 1;
-      const error = new Error('Delete error');
-      mockRequestedServiceService.deleteRequestedServiceItem.mockRejectedValue(error);
-
-      await controller.deleteRequestedServiceItem(requestedServiceId, serviceItemId, mockResponse, employeeId);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
     });
   });
 

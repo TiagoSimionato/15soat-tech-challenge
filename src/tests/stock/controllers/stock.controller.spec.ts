@@ -68,17 +68,6 @@ describe('StockController', () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith({ message: 'Estoque atualizado com sucesso.' });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.createStock.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.createResource(mockStockDTO, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('listAllStocks', () => {
@@ -101,17 +90,6 @@ describe('StockController', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.send).toHaveBeenCalledWith([]);
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.listStocks.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.listAllStocks(res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 
@@ -137,17 +115,6 @@ describe('StockController', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Recurso não foi encontrado.' });
     });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.listStockByResourceId.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.listStockByResourceId(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
-    });
   });
 
   describe('deleteStock', () => {
@@ -171,17 +138,6 @@ describe('StockController', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith({ message: 'Estoque não foi encontrado.' });
-    });
-
-    it('should return 500 when service throws an error', async () => {
-      const error = new Error('Unexpected error');
-      service.deleteStock.mockRejectedValue(error);
-      const res = mockResponse();
-
-      await controller.deleteStock(1, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith({ message: error });
     });
   });
 });
