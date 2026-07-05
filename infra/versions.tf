@@ -1,4 +1,7 @@
 terraform {
+  backend "local" {
+    path = "/opt/terraform/terraform.tfstate"
+  }
   required_providers {
     kind = {
       source  = "tehcyx/kind"
