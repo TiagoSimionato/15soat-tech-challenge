@@ -24,29 +24,29 @@ resource "kubernetes_deployment" "db" {
           env {
             name  = "POSTGRES_USER"
             value_from {
-                secret_key_ref {
-                    name = kubernetes_secret.app-secrets.metadata[0].name
-                    key  = "POSTGRES_USER"
-                }
+              secret_key_ref {
+                name = kubernetes_secret.app-secrets.metadata[0].name
+                key  = "POSTGRES_USER"
+              }
             }
           }
 
           env {
             name  = "POSTGRES_PASSWORD"
             value_from {
-                secret_key_ref {
-                    name = kubernetes_secret.app-secrets.metadata[0].name
-                    key  = "POSTGRES_PASSWORD"
-                }
+              secret_key_ref {
+                name = kubernetes_secret.app-secrets.metadata[0].name
+                key  = "POSTGRES_PASSWORD"
+              }
             }
           }
           env {
             name  = "POSTGRES_DB"
             value_from {
-                secret_key_ref {
-                    name = kubernetes_secret.app-secrets.metadata[0].name
-                    key  = "POSTGRES_DB"
-                }
+              secret_key_ref {
+                name = kubernetes_secret.app-secrets.metadata[0].name
+                key  = "POSTGRES_DB"
+              }
             }
           }
 
@@ -90,6 +90,13 @@ resource "kubernetes_deployment" "app" {
         container {
           name  = "c-15soat-tech-challenge"
           image = var.image
+
+          liveness_probe {
+            http_get {
+              path = "/health"
+              port = 3000
+            }
+          }
 
           resources {
             requests = {
