@@ -96,6 +96,7 @@ resource "kubernetes_deployment" "app" {
               path = "/health"
               port = 3000
             }
+            initial_delay_seconds = 10
           }
 
           resources {
