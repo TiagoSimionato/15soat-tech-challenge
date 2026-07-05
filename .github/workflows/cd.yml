@@ -56,6 +56,14 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Set up Env
+        id: setup_env
+        run: |
+          REPOSITORY=$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/')
+          TAG=$(echo ${{ github.sha }} | cut -c 1-7)
+          APP_IMAGE=$(ghcr.io/${REPOSITORY}:sha-${TAG})
+          echo "image=${APP_IMAGE}" >> $GITHUB_OUTPUT
+
       - name: Terraform Init and Apply
         env:
           TF_VAR_postgres_user:     ${{ secrets.DB_USER }}
@@ -64,5 +72,5 @@ jobs:
           TF_VAR_jwt_secret:        ${{ secrets.JWT_SECRET }}
           TF_VAR_ghcr_username:     ${{ secrets.GHCR_USER }}
           TF_VAR_ghcr_token:        ${{ secrets.GHCR_TOKEN }}
-          TF_VAR_image:             ghcr.io/$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/'):sha-$(echo ${{ github.sha }} | cut -c 1-7)
+          TF_VAR_image:             ${{ steps.setup_env.outputs.image }}
         run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
