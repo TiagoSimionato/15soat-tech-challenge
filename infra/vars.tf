@@ -6,6 +6,7 @@ variable "namespace" {
   default = "soat-grupo76"
 }
 
+variable "image"             {}
 variable "postgres_user"     {}
 variable "postgres_password" {}
 variable "postgres_db"       {}

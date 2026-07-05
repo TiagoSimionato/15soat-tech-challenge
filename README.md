@@ -83,6 +83,7 @@ Terraform is responsible for:
 - kubernetes_namespace → creates the namespace
 - kubernetes_secret → creates the secrets
 - kubernetes_deployment → deploys PostgreSQL
+- kubernetes_deployment → deploys API
 - kubernetes_service → creates the PostgreSQL service
 - kubernetes_service → creates the API service
 - kubernetes_horizontal_pod_autoscaler_v2 → creates the API HPA
@@ -112,6 +113,7 @@ postgres_user     = "********"
 postgres_password = "********"
 postgres_db       = "********"
 jwt_secret        = "********"
+image             = "********"
 
 ```
 

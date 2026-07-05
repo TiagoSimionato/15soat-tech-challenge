@@ -64,11 +64,5 @@ jobs:
           TF_VAR_jwt_secret:        ${{ secrets.JWT_SECRET }}
           TF_VAR_ghcr_username:     ${{ secrets.GHCR_USER }}
           TF_VAR_ghcr_token:        ${{ secrets.GHCR_TOKEN }}
+          TF_VAR_image:             ghcr.io/$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/'):sha-$(echo ${{ github.sha }} | cut -c 1-7)
         run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
-
-      - name: Replace lastest deployment tag and update cluster
-        run: |
-          REPOSITORY=$(echo ${{ github.repository }} | sed -e 's/\(.*\)/\L\1/')
-          TAG=$(echo ${{ github.sha }} | cut -c 1-7)
-          sed -i "s|image: ghcr.io/${REPOSITORY}:.*|image: ghcr.io/${REPOSITORY}:sha-${TAG}|" k8s/deployment.yml
-          kubectl apply -f k8s/deployment.yml
