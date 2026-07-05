@@ -54,16 +54,12 @@ npm run generate:migration --name=MIGRATION_NAME
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
+# rerun tests on source code changes
+$ npm run test:watch
 
 # test coverage
 $ npm run test:cov
 ```
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
 
 ## Deployment
 
@@ -114,8 +110,12 @@ postgres_password = "********"
 postgres_db       = "********"
 jwt_secret        = "********"
 image             = "********"
+ghcr_username     = "********"
+ghcr_token        = "********"
 
 ```
+
+**Note**: `ghcr_username` must be from a user with read access to the repository and `ghcr_token` must be created from that account under [github profile settings](https://github.com/settings/tokens)
 
 3. Run
 
@@ -134,7 +134,3 @@ kubectl get pods
 
 kubectl get svc
 ```
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
