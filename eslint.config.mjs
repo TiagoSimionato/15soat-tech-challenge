@@ -2,7 +2,7 @@ import { lintConfig } from 'tsm-utils/lint';
 
 const newConfig = lintConfig.map(rule => ({
   ...rule,
-  ignores: ['dist/infrastructure/database/migrations/**'],
+  ignores: ['src/**/**/migrations/**'],
 }));
 
 export default [

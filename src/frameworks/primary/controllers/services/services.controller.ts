@@ -2,11 +2,11 @@ import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put, Res } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { RequireRoles } from '../../decorators/auth/role.decorator';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
-import { Services } from '../../../secondary/services/services.entity';
-import { ServicesDTO } from '../../dto/services/services.model';
 import { ServicesService } from '../../../../core/application/services/services.service';
+import { Services } from '../../../secondary/services/services.entity';
+import { RequireRoles } from '../../decorators/auth/role.decorator';
+import { ServicesDTO } from '../../dto/services/services.model';
 
 @Controller('services')
 export class ServicesController {

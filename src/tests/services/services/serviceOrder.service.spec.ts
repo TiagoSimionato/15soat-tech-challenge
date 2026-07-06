@@ -3,11 +3,11 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
-import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
+import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { User } from '../../../frameworks/secondary/users/users.entity';
 
 const mockUser: User = {

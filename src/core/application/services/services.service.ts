@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { Services } from '../../../frameworks/secondary/services/services.entity';
 import { ServicesDTO } from '../../../frameworks/primary/dto/services/services.model';
+import { Services } from '../../../frameworks/secondary/services/services.entity';
 
 @Injectable()
 export class ServicesService {

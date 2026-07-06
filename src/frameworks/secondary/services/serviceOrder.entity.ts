@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { ColumnNumericTransformer } from '../../../utils/transformers';
 import { User } from '../../secondary/users/users.entity';
 import { Vehicle } from '../../secondary/vehicle/vehicle.entity';
-import { ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_order' })

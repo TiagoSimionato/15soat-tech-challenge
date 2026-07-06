@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
+import { StockService } from '../../../core/application/stock/stock.service';
 import { StockController } from '../../../frameworks/primary/controllers/stock/stock.controller';
 import { StockDTO, StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
-import { StockService } from '../../../core/application/stock/stock.service';
 
 const mockStockDTO: StockDTO = {
   amount: 10,

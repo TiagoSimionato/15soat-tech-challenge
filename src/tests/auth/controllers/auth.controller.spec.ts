@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { AuthService } from '../../../core/application/auth/auth.service';
 import { AuthController } from '../../../frameworks/primary/controllers/auth/auth.controller';
 import { SignInRequest } from '../../../frameworks/primary/dto/auth/signIn.model';
 import { SignUpRequest } from '../../../frameworks/primary/dto/auth/signUp.model';
-import { AuthService } from '../../../core/application/auth/auth.service';
-import { LegalNature } from '../../../common/enums/users/legalNature.enum';
 
 const mockSignInRequest: SignInRequest = {
   password: 'password123',

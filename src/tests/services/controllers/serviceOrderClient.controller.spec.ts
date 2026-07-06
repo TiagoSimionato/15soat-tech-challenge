@@ -1,15 +1,15 @@
 import type { Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
+import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
 import { ServiceOrderClientController } from '../../../frameworks/primary/controllers/services/serviceOrderClient.controller';
+import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
-import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
-import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
-import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
-import { LegalNature } from '../../../common/enums/users/legalNature.enum';
 
 describe('serviceOrderClientController', () => {
   let controller: ServiceOrderClientController;

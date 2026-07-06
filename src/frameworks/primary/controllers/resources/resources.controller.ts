@@ -2,13 +2,13 @@ import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put, Res } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
-import { RequireRoles } from '../../decorators/auth/role.decorator';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
+import { ResourceService } from '../../../../core/application/resources/resources.service';
 import { Resource } from '../../../secondary/resources/resources.entity';
 import { ResourcesByService } from '../../../secondary/resources/resourcesByService.entity';
+import { RequireRoles } from '../../decorators/auth/role.decorator';
 import { ResourceDTO } from '../../dto/resources/resource.model';
 import { ResourceByServiceDTO } from '../../dto/resources/resourceByService.model';
-import { ResourceService } from '../../../../core/application/resources/resources.service';
 
 @RequireRoles([Roles.ADMIN])
 @Controller('resources')

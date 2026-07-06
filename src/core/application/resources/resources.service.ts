@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, UpdateResult } from 'typeorm';
 import { DeleteResult } from 'typeorm/browser';
+import { ResourceDTO } from '../../../frameworks/primary/dto/resources/resource.model';
 import { Resource } from '../../../frameworks/secondary/resources/resources.entity';
 import { ResourcesByService } from '../../../frameworks/secondary/resources/resourcesByService.entity';
-import { ResourceDTO } from '../../../frameworks/primary/dto/resources/resource.model';
 
 @Injectable()
 export class ResourceService {

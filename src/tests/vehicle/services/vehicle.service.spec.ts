@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Vehicle } from '../../../frameworks/secondary/vehicle/vehicle.entity';
-import { VehicleDTO } from '../../../frameworks/primary/dto/vehicle/vehicle.model';
 import { VehicleService } from '../../../core/application/vehicle/vehicle.service';
+import { VehicleDTO } from '../../../frameworks/primary/dto/vehicle/vehicle.model';
+import { Vehicle } from '../../../frameworks/secondary/vehicle/vehicle.entity';
 import { isValidPlate } from '../../../utils/isValidPlate';
 
 jest.mock('../../../utils/isValidPlate', () => ({

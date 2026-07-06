@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { AuthService } from '../../../../core/application/auth/auth.service';
 import { Public } from '../../decorators/auth/public.decorator';
 import { SignInRequest } from '../../dto/auth/signIn.model';
 import { SignUpRequest } from '../../dto/auth/signUp.model';
-import { AuthService } from '../../../../core/application/auth/auth.service';
 
 @Controller({ path: 'auth' })
 export class AuthController {

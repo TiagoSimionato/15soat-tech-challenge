@@ -1,20 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
+import { ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
 import { Resource } from '../../../frameworks/secondary/resources/resources.entity';
 import { ResourcesByService } from '../../../frameworks/secondary/resources/resourcesByService.entity';
-import { ResourceService } from '../resources/resources.service';
-import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
-import { StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
-import { StockService } from '../stock/stock.service';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../../frameworks/secondary/services/services.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
-import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
-import { ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
+import { ResourceService } from '../resources/resources.service';
 import { ServicesService } from '../services/services.service';
+import { StockService } from '../stock/stock.service';
 
 type RequestedServiceValidations = {
   clientId?: number;

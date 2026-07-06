@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Inject, NotFoundException, Param, Put } from '@nestjs/common';
-import { RequireRoles } from '../../decorators/auth/role.decorator';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
-import { SignUpRequest } from '../../dto/auth/signUp.model';
 import { UserService } from '../../../../core/application/users/users.service';
+import { RequireRoles } from '../../decorators/auth/role.decorator';
+import { SignUpRequest } from '../../dto/auth/signUp.model';
 
 @RequireRoles([Roles.ADMIN])
 @Controller('users')

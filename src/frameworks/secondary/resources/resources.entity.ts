@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ColumnNumericTransformer } from '../../../utils/transformers';
 import { ResourceType, UnitType } from '../../../common/enums/resources/resources.enum';
+import { ColumnNumericTransformer } from '../../../utils/transformers';
 import { ResourcesByService } from './resourcesByService.entity';
 
 @Entity({ name: 'tb_resource' })

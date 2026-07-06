@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
-import { StockDTO, StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
 import { StockService } from '../../../core/application/stock/stock.service';
+import { StockDTO, StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
+import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
 import { stockResponseFormatter } from '../../../utils/stockResponse.helper';
 
 jest.mock('../../../utils/stockResponse.helper', () => ({

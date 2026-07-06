@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { User } from '../../../frameworks/secondary/users/users.entity';
-import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+import { User } from '../../../frameworks/secondary/users/users.entity';
 import { RequestedServiceService } from './requestedService.service';
 
 @Injectable()

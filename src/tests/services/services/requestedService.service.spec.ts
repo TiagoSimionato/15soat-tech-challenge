@@ -10,17 +10,17 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ResourceService } from '../../../core/application/resources/resources.service';
-import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
-import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
-import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import {
   RequestedServicesStatus,
   ServiceOrderStatus,
 } from '../../../common/enums/services/services.enum';
+import { ResourceService } from '../../../core/application/resources/resources.service';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServicesService } from '../../../core/application/services/services.service';
 import { StockService } from '../../../core/application/stock/stock.service';
+import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
+import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 
 const makeManager = () => ({
   create: jest.fn(),

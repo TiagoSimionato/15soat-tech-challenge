@@ -1,8 +1,8 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
 import { RequestedService } from '../services/requestedService.entity';
 import { ServiceOrder } from '../services/serviceOrder.entity';
 import { Vehicle } from '../vehicle/vehicle.entity';
-import { LegalNature } from '../../../common/enums/users/legalNature.enum';
 import { Role } from './roles.entity';
 
 @Entity({ name: 'tb_user' })

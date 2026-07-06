@@ -1,10 +1,10 @@
 import type { Response } from 'express';
 import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
-import { RequireRoles } from '../../../primary/decorators/auth/role.decorator';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
-import { StockDTO, StockResponse } from '../../dto/stock/stock.model';
 import { StockService } from '../../../../core/application/stock/stock.service';
+import { RequireRoles } from '../../../primary/decorators/auth/role.decorator';
+import { StockDTO, StockResponse } from '../../dto/stock/stock.model';
 
 @RequireRoles([Roles.ADMIN])
 @Controller('stocks')

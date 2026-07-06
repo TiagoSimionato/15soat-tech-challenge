@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
+import { VehicleService } from '../../../core/application/vehicle/vehicle.service';
 import { VehicleController } from '../../../frameworks/primary/controllers/vehicle/vehicle.controller';
 import { VehicleDTO } from '../../../frameworks/primary/dto/vehicle/vehicle.model';
-import { VehicleService } from '../../../core/application/vehicle/vehicle.service';
 
 const mockUserId = 1;
 

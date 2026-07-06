@@ -2,10 +2,10 @@ import type { DeleteResult, UpdateResult } from 'typeorm';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
-import { ServicesController } from '../../../frameworks/primary/controllers/services/services.controller';
-import { Services } from '../../../frameworks/secondary/services/services.entity';
-import { ServicesDTO } from '../../../frameworks/primary/dto/services/services.model';
 import { ServicesService } from '../../../core/application/services/services.service';
+import { ServicesController } from '../../../frameworks/primary/controllers/services/services.controller';
+import { ServicesDTO } from '../../../frameworks/primary/dto/services/services.model';
+import { Services } from '../../../frameworks/secondary/services/services.entity';
 
 describe('servicesController', () => {
   let controller: ServicesController;
