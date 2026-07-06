@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Resource } from '../resources/entities/resources.entity';
-import { ResourcesByService } from '../resources/entities/resourcesByService.entity';
-import { ResourceService } from '../resources/services/resources.service';
-import { Stock } from '../stock/entities/stock.entity';
-import { StockService } from '../stock/services/stock.service';
-import { ServiceOrderClientController } from './controllers/serviceOrderClient.controller';
-import { ServiceOrderEmployeeController } from './controllers/serviceOrderEmployee.controller';
-import { ServicesController } from './controllers/services.controller';
-import { RequestedService } from './entities/requestedService.entity';
-import { ServiceItem } from './entities/serviceItem.entity';
-import { ServiceOrder } from './entities/serviceOrder.entity';
-import { Services } from './entities/services.entity';
-import { RequestedServiceService } from './services/requestedService.service';
-import { ServiceOrderService } from './services/serviceOrder.service';
-import { ServicesService } from './services/services.service';
+import { Resource } from '../../frameworks/secondary/resources/resources.entity';
+import { ResourcesByService } from '../../frameworks/secondary/resources/resourcesByService.entity';
+import { ResourceService } from '../../core/application/resources/resources.service';
+import { Stock } from '../../frameworks/secondary/stock/stock.entity';
+import { StockService } from '../../core/application/stock/stock.service';
+import { ServiceOrderClientController } from '../../frameworks/primary/controllers/services/serviceOrderClient.controller';
+import { ServiceOrderEmployeeController } from '../../frameworks/primary/controllers/services/serviceOrderEmployee.controller';
+import { ServicesController } from '../../frameworks/primary/controllers/services/services.controller';
+import { RequestedService } from '../../frameworks/secondary/services/requestedService.entity';
+import { ServiceItem } from '../../frameworks/secondary/services/serviceItem.entity';
+import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.entity';
+import { Services } from '../../frameworks/secondary/services/services.entity';
+import { RequestedServiceService } from '../../core/application/services/requestedService.service';
+import { ServiceOrderService } from '../../core/application/services/serviceOrder.service';
+import { ServicesService } from '../../core/application/services/services.service';
 
 @Module({
   controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],

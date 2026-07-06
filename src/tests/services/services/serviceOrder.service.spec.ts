@@ -3,12 +3,12 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ServiceOrder } from '../../../modules/services/entities/serviceOrder.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../modules/services/enums/services.types';
-import { ServiceOrderDTO } from '../../../modules/services/models/serviceOrder.model';
-import { RequestedServiceService } from '../../../modules/services/services/requestedService.service';
-import { ServiceOrderService } from '../../../modules/services/services/serviceOrder.service';
-import { User } from '../../../modules/users/entities/users.entity';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
+import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
+import { User } from '../../../frameworks/secondary/users/users.entity';
 
 const mockUser: User = {
   document: '12345678901',

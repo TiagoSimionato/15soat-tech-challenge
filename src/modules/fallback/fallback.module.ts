@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { FallbackController } from './controllers/fallback.controler';
+import { FallbackController } from '../../frameworks/primary/controllers/fallback/fallback.controller';
 
 @Module({
   controllers: [FallbackController],

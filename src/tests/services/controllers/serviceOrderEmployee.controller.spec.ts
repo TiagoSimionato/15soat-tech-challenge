@@ -1,14 +1,14 @@
 import type { Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderEmployeeController } from '../../../modules/services/controllers/serviceOrderEmployee.controller';
-import { RequestedService } from '../../../modules/services/entities/requestedService.entity';
-import { ServiceOrder } from '../../../modules/services/entities/serviceOrder.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../modules/services/enums/services.types';
-import { ServiceItemDTO } from '../../../modules/services/models/serviceItem.model';
-import { DeliverServiceOrderDTO, VehicleArrivedDTO } from '../../../modules/services/models/serviceOrder.model';
-import { RequestedServiceService } from '../../../modules/services/services/requestedService.service';
-import { ServiceOrderService } from '../../../modules/services/services/serviceOrder.service';
+import { ServiceOrderEmployeeController } from '../../../frameworks/primary/controllers/services/serviceOrderEmployee.controller';
+import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
+import { DeliverServiceOrderDTO, VehicleArrivedDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
+import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
 
 describe('serviceOrderEmployeeController', () => {
   let controller: ServiceOrderEmployeeController;

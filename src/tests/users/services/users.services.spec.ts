@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { SignUpRequest } from '../../../modules/auth/requests/signUp.model';
-import { User } from '../../../modules/users/entities/users.entity';
-import { LegalNature } from '../../../modules/users/enums/legalNature';
-import { UserResponseDTO } from '../../../modules/users/models/user.model';
-import { UserService } from '../../../modules/users/services/users.service';
+import { SignUpRequest } from '../../../frameworks/primary/dto/auth/signUp.model';
+import { User } from '../../../frameworks/secondary/users/users.entity';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { UserResponseDTO } from '../../../frameworks/primary/dto/users/user.model';
+import { UserService } from '../../../core/application/users/users.service';
 
 const mockUserEntity = new UserResponseDTO({
   document: '12345678901',

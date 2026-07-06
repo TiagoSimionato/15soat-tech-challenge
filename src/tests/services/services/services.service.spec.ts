@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Services } from '../../../modules/services/entities/services.entity';
-import { ServicesDTO } from '../../../modules/services/models/services.model';
-import { ServicesService } from '../../../modules/services/services/services.service';
+import { Services } from '../../../frameworks/secondary/services/services.entity';
+import { ServicesDTO } from '../../../frameworks/primary/dto/services/services.model';
+import { ServicesService } from '../../../core/application/services/services.service';
 
 const mockServicesEntity: Services = {
   cost: 100,
