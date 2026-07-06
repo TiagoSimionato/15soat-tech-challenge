@@ -17,8 +17,8 @@ import { VehiclesModule } from './modules/vehicle/vehicle.module';
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     TypeOrmModule.forRoot({
       ...dataSourceConfigs,
-      entities: ['dist/**/**/*.entity{.ts,.js}'],
-      migrations: ['dist/**/**/migrations/*{.ts,.js}'],
+      entities: ['dist/**/*.entity{.ts,.js}'],
+      migrations: ['dist/**/migrations/*{.ts,.js}'],
     }),
     UsersModule,
     AuthModule,
