@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ResourcesController } from '../../../modules/resources/controllers/resources.controller';
-import { Resource } from '../../../modules/resources/entities/resources.entity';
-import { ResourcesByService } from '../../../modules/resources/entities/resourcesByService.entity';
-import { ResourceDTO } from '../../../modules/resources/models/resource.model';
-import { ResourceByServiceDTO } from '../../../modules/resources/models/resourceByService.model';
-import { ResourceService } from '../../../modules/resources/services/resources.service';
+import { ResourceService } from '../../../core/application/resources/resources.service';
+import { ResourcesController } from '../../../frameworks/primary/controllers/resources/resources.controller';
+import { ResourceDTO } from '../../../frameworks/primary/dto/resources/resource.model';
+import { ResourceByServiceDTO } from '../../../frameworks/primary/dto/resources/resourceByService.model';
+import { Resource } from '../../../frameworks/secondary/resources/resources.entity';
+import { ResourcesByService } from '../../../frameworks/secondary/resources/resourcesByService.entity';
 
 const mockResourceDTO: ResourceDTO = {
   cost: 100,

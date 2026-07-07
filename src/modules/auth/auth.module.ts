@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from '../../common/constants/auth/auth.constants';
+import { AuthService } from '../../core/application/auth/auth.service';
+import { AuthController } from '../../frameworks/primary/controllers/auth/auth.controller';
+import { AuthGuard } from '../../frameworks/primary/guards/auth.guard';
+import { RolesGuard } from '../../frameworks/primary/guards/roles.guard';
 import { UsersModule } from '../users/users.module';
-import { jwtConstants } from './constants/auth.constants';
-import { AuthController } from './controllers/auth.controller';
-import { AuthGuard } from './guards/auth.guard';
-import { RolesGuard } from './guards/roles.guards';
-import { AuthService } from './services/auth.service';
 
 @Module({
   controllers: [AuthController],

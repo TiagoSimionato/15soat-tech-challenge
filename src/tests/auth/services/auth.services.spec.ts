@@ -3,10 +3,10 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
-import { SignUpRequest } from '../../../modules/auth/requests/signUp.model';
-import { AuthService } from '../../../modules/auth/services/auth.service';
-import { LegalNature } from '../../../modules/users/enums/legalNature';
-import { UserService } from '../../../modules/users/services/users.service';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { AuthService } from '../../../core/application/auth/auth.service';
+import { UserService } from '../../../core/application/users/users.service';
+import { SignUpRequest } from '../../../frameworks/primary/dto/auth/signUp.model';
 
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),

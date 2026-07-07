@@ -1,15 +1,15 @@
 import type { Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceOrderClientController } from '../../../modules/services/controllers/serviceOrderClient.controller';
-import { RequestedService } from '../../../modules/services/entities/requestedService.entity';
-import { ServiceItem } from '../../../modules/services/entities/serviceItem.entity';
-import { ServiceOrder } from '../../../modules/services/entities/serviceOrder.entity';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../modules/services/enums/services.types';
-import { ServiceOrderDTO } from '../../../modules/services/models/serviceOrder.model';
-import { RequestedServiceService } from '../../../modules/services/services/requestedService.service';
-import { ServiceOrderService } from '../../../modules/services/services/serviceOrder.service';
-import { LegalNature } from '../../../modules/users/enums/legalNature';
+import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
+import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
+import { ServiceOrderClientController } from '../../../frameworks/primary/controllers/services/serviceOrderClient.controller';
+import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
+import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
+import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 
 describe('serviceOrderClientController', () => {
   let controller: ServiceOrderClientController;

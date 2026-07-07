@@ -2,11 +2,11 @@ import type { DeleteResult, UpdateResult } from 'typeorm';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SignUpRequest } from '../../../modules/auth/requests/signUp.model';
-import { UsersController } from '../../../modules/users/controllers/users.controller';
-import { LegalNature } from '../../../modules/users/enums/legalNature';
-import { UserResponseDTO } from '../../../modules/users/models/user.model';
-import { UserService } from '../../../modules/users/services/users.service';
+import { LegalNature } from '../../../common/enums/users/legalNature.enum';
+import { UserService } from '../../../core/application/users/users.service';
+import { UsersController } from '../../../frameworks/primary/controllers/users/users.controller';
+import { SignUpRequest } from '../../../frameworks/primary/dto/auth/signUp.model';
+import { UserResponseDTO } from '../../../frameworks/primary/dto/users/user.model';
 
 describe('usersController', () => {
   let controller: UsersController;

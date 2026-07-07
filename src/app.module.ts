@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HealthController } from './common/HealthController';
-import { dataSourceConfigs } from './configs/dataSourceConfigs';
+import { HealthController } from './frameworks/primary/controllers/health/HealthController';
+import { dataSourceConfigs } from './infrastructure/database/dataSourceConfigs';
 import { AuthModule } from './modules/auth/auth.module';
 import { FallbackModule } from './modules/fallback/fallback.module';
 import { ResourcesModule } from './modules/resources/resources.module';

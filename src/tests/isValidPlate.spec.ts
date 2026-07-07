@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { isValidPlate } from '../modules/vehicle/utils/isValidPlate';
+import { isValidPlate } from '../utils/isValidPlate';
 
 describe('isValidPlate', () => {
   it('should identify old standard plates', () => {
