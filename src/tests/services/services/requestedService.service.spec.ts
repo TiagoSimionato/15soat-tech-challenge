@@ -14,11 +14,13 @@ import {
   RequestedServicesStatus,
   ServiceOrderStatus,
 } from '../../../common/enums/services/services.enum';
+import { PartsService } from '../../../core/application/parts/parts.service';
 import { ResourceService } from '../../../core/application/resources/resources.service';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServicesService } from '../../../core/application/services/services.service';
 import { StockService } from '../../../core/application/stock/stock.service';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
+import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 
@@ -84,6 +86,7 @@ describe('RequestedServiceService', () => {
   let resourceService: any;
   let servicesService: any;
   let stockService: any;
+  let partsService: any;
   let manager: any;
   beforeEach(async () => {
     manager = makeManager();
@@ -96,7 +99,7 @@ describe('RequestedServiceService', () => {
           useFactory: makeRepository,
         },
         {
-          provide: getRepositoryToken(ServiceItem),
+          provide: getRepositoryToken(RequestedServicePart),
           useFactory: makeRepository,
         },
         {
@@ -114,14 +117,21 @@ describe('RequestedServiceService', () => {
             listStockByStockId: jest.fn(),
           },
         },
+        {
+          provide: PartsService,
+          useValue: {
+            listOnePartByService: jest.fn(),
+          },
+        },
       ],
     }).compile();
     service = module.get<RequestedServiceService>(RequestedServiceService);
     requestedServiceRepo = module.get(getRepositoryToken(RequestedService));
-    serviceItemRepo = module.get(getRepositoryToken(ServiceItem));
+    serviceItemRepo = module.get(getRepositoryToken(RequestedServicePart));
     resourceService = module.get(ResourceService);
     servicesService = module.get(ServicesService);
     stockService = module.get(StockService);
+    partsService = module.get(PartsService);
   });
   afterEach(async () => jest.clearAllMocks());
   describe('createRequestedServiceOrder', () => {
@@ -163,6 +173,61 @@ describe('RequestedServiceService', () => {
       manager.save.mockResolvedValue({ id: 1 });
       await expect(
         service.createRequestedServiceOrder(manager, 1, [{ id: 1 }] as any),
+      ).rejects.toThrow(BadRequestException);
+    });
+    it('should create requested service parts when parts are provided', async () => {
+      resourceService.listResourcesOfAService.mockResolvedValue([
+        mockResourceByService,
+      ]);
+      servicesService.listOneService.mockResolvedValue(mockService);
+      resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.listStockByResourceId.mockResolvedValue(mockStock);
+      partsService.listOnePartByService.mockResolvedValue({
+        id: 1,
+        part: { id: 1 },
+        service: mockService,
+      } as never);
+      manager.create.mockReturnValue({ id: 1 });
+      manager.save.mockResolvedValue({ id: 1 });
+      const repoMock = { findOne: jest.fn(), save: jest.fn() };
+      repoMock.findOne.mockResolvedValue({
+        id: 1,
+        requestedServices: [{ cost: 200 }],
+      } as never);
+      repoMock.save.mockResolvedValue(undefined as never);
+      manager.getRepository.mockReturnValue(repoMock);
+
+      await service.createRequestedServiceOrder(manager, 1, [
+        { id: 1, parts: [{ id: 1 }] },
+      ] as any);
+
+      expect(partsService.listOnePartByService).toHaveBeenCalledWith(
+        1,
+        1,
+        manager,
+      );
+      expect(manager.create).toHaveBeenCalledWith(
+        RequestedServicePart,
+        expect.objectContaining({
+          part: { id: 1 },
+        }),
+      );
+    });
+    it('should throw BadRequestException when a part is not found for the service', async () => {
+      resourceService.listResourcesOfAService.mockResolvedValue([
+        mockResourceByService,
+      ]);
+      servicesService.listOneService.mockResolvedValue(mockService);
+      resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.listStockByResourceId.mockResolvedValue(mockStock);
+      partsService.listOnePartByService.mockResolvedValue(null);
+      manager.create.mockReturnValue({ id: 1 });
+      manager.save.mockResolvedValue({ id: 1 });
+
+      await expect(
+        service.createRequestedServiceOrder(manager, 1, [
+          { id: 1, parts: [{ id: 1 }] },
+        ] as any),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -681,7 +746,7 @@ describe('RequestedServiceService', () => {
 
       await expect(
         service.upsertItemOnRequestedService(mockServiceItemDTO as any, 10),
-      ).rejects.toThrow(new BadRequestException('Estoque não identificado.'));
+      ).rejects.toThrow(new BadRequestException('Stock not found.'));
     });
 
     it('should throw BadRequestException when employee is not the assigned one', async () => {
@@ -777,7 +842,7 @@ describe('RequestedServiceService', () => {
       await expect(
         service.deleteRequestedServiceItem(1, 99, 10),
       ).rejects.toThrow(
-        new BadRequestException('Item não encontrado na ordem de serviço fornecida.'),
+        new BadRequestException('Item not found in the provided service order.'),
       );
     });
 
@@ -791,7 +856,7 @@ describe('RequestedServiceService', () => {
       await expect(
         service.deleteRequestedServiceItem(1, 1, 10),
       ).rejects.toThrow(
-        new BadRequestException('Item não encontrado na ordem de serviço fornecida.'),
+        new BadRequestException('Item not found in the provided service order.'),
       );
     });
 
