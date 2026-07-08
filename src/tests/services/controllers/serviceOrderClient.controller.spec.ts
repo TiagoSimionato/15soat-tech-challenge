@@ -40,6 +40,7 @@ describe('serviceOrderClientController', () => {
     id: 1,
     service: {} as any,
     serviceItem: [] as any,
+    requestedServicePart: [] as any,
     serviceOrder: {
       budget: 0,
       cost: 0,

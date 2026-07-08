@@ -24,6 +24,7 @@ describe('servicesController', () => {
     name: 'Service A',
     requestedService: [] as any,
     resources: [],
+    parts: [] as any,
   };
 
   const mockServicesDTO: ServicesDTO = {

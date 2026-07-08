@@ -51,6 +51,7 @@ describe('serviceOrderEmployeeController', () => {
     id: 1,
     service: {} as any,
     serviceItem: [] as any,
+    requestedServicePart: [] as any,
     serviceOrder: mockServiceOrder,
     started_at: new Date(),
     status: RequestedServicesStatus.RECEBIDA,
