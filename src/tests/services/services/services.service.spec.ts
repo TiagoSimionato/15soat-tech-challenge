@@ -9,6 +9,7 @@ const mockServicesEntity: Services = {
   cost: 100,
   id: 1,
   name: 'Service A',
+  parts: [] as any,
   requestedService: {} as any,
   resources: [],
 };

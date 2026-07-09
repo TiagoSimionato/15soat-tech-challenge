@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ColumnNumericTransformer } from '../../../utils/transformers';
 import { User } from '../../secondary/users/users.entity';
+import { RequestedServicePart } from './requestedServicePart.entity';
 import { ServiceItem } from './serviceItem.entity';
 import { ServiceOrder } from './serviceOrder.entity';
 import { Services } from './services.entity';
@@ -36,4 +37,7 @@ export class RequestedService {
 
   @OneToMany(() => ServiceItem, item => item.requestedService)
   serviceItem: ServiceItem[];
+
+  @OneToMany(() => RequestedServicePart, requestedServicePart => requestedServicePart.requestedService)
+  requestedServicePart: RequestedServicePart[];
 }

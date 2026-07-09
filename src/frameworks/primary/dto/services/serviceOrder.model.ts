@@ -1,9 +1,18 @@
 import { Type } from 'class-transformer';
 import { IsDateString, IsInt, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 
+export class PartServiceDTO {
+  @IsInt()
+  id: number;
+}
+
 export class ServiceOrderServiceDTO {
   @IsInt()
   id: number;
+
+  @ValidateNested()
+  @Type(() => PartServiceDTO)
+  parts?: PartServiceDTO[];
 }
 
 export class ServiceOrderDTO {

@@ -38,6 +38,7 @@ describe('serviceOrderClientController', () => {
     employee: {} as any,
     finished_at: new Date('2027-01-01T00:00:00Z'),
     id: 1,
+    requestedServicePart: [] as any,
     service: {} as any,
     serviceItem: [] as any,
     serviceOrder: {

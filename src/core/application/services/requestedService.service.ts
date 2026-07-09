@@ -3,15 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
 import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
-import { ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
+import { PartServiceDTO, ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
+import { PartsByService } from '../../../frameworks/secondary/parts/partsByService.entity';
 import { Resource } from '../../../frameworks/secondary/resources/resources.entity';
 import { ResourcesByService } from '../../../frameworks/secondary/resources/resourcesByService.entity';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
+import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../../frameworks/secondary/services/services.entity';
 import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
+import { PartsService } from '../parts/parts.service';
 import { ResourceService } from '../resources/resources.service';
 import { ServicesService } from '../services/services.service';
 import { StockService } from '../stock/stock.service';
@@ -29,11 +32,13 @@ export class RequestedServiceService {
     private readonly dataSource: DataSource,
     @InjectRepository(RequestedService)
     private readonly requestedServiceRepository: Repository<RequestedService>,
+    @InjectRepository(RequestedServicePart)
     @InjectRepository(ServiceItem)
     private readonly serviceItemRepository: Repository<ServiceItem>,
     private readonly resourceService: ResourceService,
     private readonly servicesService: ServicesService,
     private readonly stockService: StockService,
+    private readonly partsService: PartsService,
   ) { }
 
   async createRequestedServiceOrder(manager: EntityManager, serviceOrderId: number, arrServices: ServiceOrderServiceDTO[]) {
@@ -51,6 +56,11 @@ export class RequestedServiceService {
       });
 
       const requestedServiceId: number = (await manager.save(dbReqServiceOrder)).id;
+
+      if (arrServices[i].parts) {
+        await this.createRequestedServiceParts(manager, requestedServiceId, arrServices[i].id, arrServices[i].parts);
+      }
+
       await this.createServiceItems(manager, requestedServiceId, arrServices[i].id);
       await this.updateServiceOrderBudget(serviceOrderId, manager);
     }
@@ -77,7 +87,7 @@ export class RequestedServiceService {
 
       if (!stock) {
         throw new BadRequestException(
-          `Estoque não encontrado para o recurso ${resourcesByService[i].resource.id}`,
+          `Stock not found for resource ${resourcesByService[i].resource.id}`,
         );
       }
 
@@ -92,6 +102,29 @@ export class RequestedServiceService {
       });
 
       await manager.save(dbServiceItem);
+    }
+  }
+
+  private async createRequestedServiceParts(manager: EntityManager, requestedServiceId: number, serviceId: number, parts: PartServiceDTO[]) {
+    const formattedParts = [...new Map(parts.map(part => [part.id, part])).values()];
+
+    for (const part of formattedParts) {
+      const partsByService: null | PartsByService = await this.partsService.listOnePartByService(serviceId, part.id, manager);
+
+      if (!partsByService) {
+        throw new BadRequestException(`Part not found for service ${serviceId} and part ${part.id}`);
+      }
+
+      const dbRequestedServicePart = manager.create(RequestedServicePart, {
+        part: {
+          id: part.id,
+        },
+        requestedService: {
+          id: requestedServiceId,
+        },
+      });
+
+      await manager.save(dbRequestedServicePart);
     }
   }
 
@@ -195,7 +228,7 @@ export class RequestedServiceService {
 
       if (!stock) {
         throw new BadRequestException(
-          'Estoque não identificado.',
+          'Stock not found.',
         );
       }
 
@@ -228,7 +261,7 @@ export class RequestedServiceService {
 
       if (!item || Number(item.requestedService.id) !== Number(requestedServiceId)) {
         throw new BadRequestException(
-          'Item não encontrado na ordem de serviço fornecida.',
+          'Item not found in the provided service order.',
         );
       }
       this.validateRequestedService(item.requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
@@ -374,7 +407,7 @@ export class RequestedServiceService {
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
     if (validations.employeeId && requestedService.employee?.id !== validations.employeeId)
-      throw new BadRequestException('Apenas o funcionário atribuído a este serviço pode alterá-lo');
+      throw new BadRequestException('Only the assigned employee can modify this service');
     if (validations.clientId && requestedService.serviceOrder.user.id !== validations.clientId)
       throw new BadRequestException('Requested Service not found');
     if (validations.status && validations.status !== requestedService.status)
