@@ -22,3 +22,8 @@ provider "kubernetes" {
   client_key             = kind_cluster.main.client_key
   cluster_ca_certificate = kind_cluster.main.cluster_ca_certificate
 }
+
+module "metrics_server" {
+  source = "cookielab/metrics-server/kubernetes"
+  version = "0.9.0"
+}
