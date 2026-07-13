@@ -28,3 +28,10 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa-app" {
 
   depends_on = [kubernetes_namespace.app]
 }
+
+resource "kubernetes_manifest" "metrics_server" {
+  for_each = local.metrics_server_docs
+  manifest = each.value
+
+  depends_on = [kubernetes_namespace.app]
+}
