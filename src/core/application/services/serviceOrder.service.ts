@@ -80,8 +80,10 @@ export class ServiceOrderService {
     if (!canDeliver)
       throw new BadRequestException('Service order cannot be delivered');
 
+    const isEveryServiceCancelled = serviceOrder.requestedServices.every(requestedService => requestedService.status === RequestedServicesStatus.CANCELADO);
+
     serviceOrder.vehicle_delivered_at = new Date(vehicleDeliveredAt);
-    serviceOrder.status = ServiceOrderStatus.ENTREGUE;
+    serviceOrder.status = isEveryServiceCancelled ? ServiceOrderStatus.CANCELADO : ServiceOrderStatus.ENTREGUE;
     serviceOrder.requestedServices.forEach((requestedService) => {
       if (requestedService.status === RequestedServicesStatus.FINALIZADA) {
         requestedService.status = RequestedServicesStatus.ENTREGUE;
