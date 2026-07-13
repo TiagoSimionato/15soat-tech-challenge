@@ -101,12 +101,12 @@ resource "kubernetes_deployment" "app" {
 
           resources {
             requests = {
-              cpu               = "1m"
+              cpu               = "1"
               memory            = "100Mi"
               ephemeral-storage = "2Gi"
             }
             limits = {
-              cpu    = "2m"
+              cpu    = "2"
               memory = "100Mi"
             }
           }
