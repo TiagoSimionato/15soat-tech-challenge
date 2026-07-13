@@ -20,7 +20,7 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "hpa-app" {
         name = "cpu"
         target {
           type                = "Utilization"
-          average_utilization = 50
+          average_utilization = 25
         }
       }
     }
