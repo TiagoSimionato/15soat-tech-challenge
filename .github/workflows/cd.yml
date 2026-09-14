@@ -66,11 +66,15 @@ jobs:
 
       - name: Terraform Init and Apply
         env:
-          TF_VAR_postgres_user:     ${{ secrets.DB_USER }}
-          TF_VAR_postgres_password: ${{ secrets.DB_PASSWORD }}
-          TF_VAR_postgres_db:       ${{ vars.DB_NAME }}
-          TF_VAR_jwt_secret:        ${{ secrets.JWT_SECRET }}
-          TF_VAR_ghcr_username:     ${{ secrets.GHCR_USER }}
-          TF_VAR_ghcr_token:        ${{ secrets.GHCR_TOKEN }}
-          TF_VAR_image:             ${{ steps.setup_env.outputs.image }}
+          TF_VAR_postgres_user:               ${{ secrets.DB_USER }}
+          TF_VAR_postgres_password:           ${{ secrets.DB_PASSWORD }}
+          TF_VAR_postgres_db:                 ${{ vars.DB_NAME }}
+          TF_VAR_jwt_secret:                  ${{ secrets.JWT_SECRET }}
+          TF_VAR_ghcr_username:               ${{ secrets.GHCR_USER }}
+          TF_VAR_ghcr_token:                  ${{ secrets.GHCR_TOKEN }}
+          TF_VAR_image:                       ${{ steps.setup_env.outputs.image }}
+          TF_VAR_kind_endpoint:               ${{ secrets.KIND_ENDPOINT }}
+          TF_VAR_kind_client_certificate:     ${{ secrets.KIND_CLIENT_CERTIFICATE }}
+          TF_VAR_kind_client_key:             ${{ secrets.KIND_CLIENT_KEY }}
+          TF_VAR_kind_cluster_ca_certificate: ${{ secrets.KIND_CLUSTER_CA_CERTIFICATE }}
         run: terraform -chdir=infra init && terraform -chdir=infra apply -auto-approve
