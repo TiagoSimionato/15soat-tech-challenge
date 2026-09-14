@@ -15,6 +15,4 @@ resource "kubernetes_service" "app" {
 
     type = "NodePort"
   }
-
-  depends_on = [kubernetes_namespace.app]
 }
