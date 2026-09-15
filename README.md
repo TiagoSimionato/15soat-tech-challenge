@@ -11,7 +11,7 @@ $ npm install
 First create a `.env` file specifying the env variable used for database connection and JWT key signing:
 
 ```bash
-DB_HOST # (=localhost for local testing)
+DB_HOST # ( = localhost for local testing )
 DB_NAME
 DB_USER
 DB_PASSWORD
