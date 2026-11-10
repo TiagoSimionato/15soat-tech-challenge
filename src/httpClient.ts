@@ -56,13 +56,11 @@ export abstract class HttpClient {
   ): Promise<AxiosResponse<T>> {
     const token = await this.getBearerToken();
 
-    // @ts-expect-error ???
     return firstValueFrom(
       this.httpService.request<T>({
         baseURL: this.serviceUrl,
         timeout: 3000,
         ...config,
-        // @ts-expect-error ???
         headers: {
           ...config.headers,
           Authorization: `Bearer ${token}`,
