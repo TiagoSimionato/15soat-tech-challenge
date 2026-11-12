@@ -77,10 +77,45 @@ resource "kubernetes_deployment" "app" {
             name = "DB_PORT"
             value = var.db_port
           }
-
+          
           env {
-            name = "JWT_SECRET"
-            value = var.jwt_secret
+            name  = "JWT_SECRET"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "JWT_SECRET"
+              }
+            }
+          }
+          
+          env {
+            name  = "CLIENT_ID"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "CLIENT_ID"
+              }
+            }
+          }
+          
+          env {
+            name  = "CLIENT_SECRET"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "CLIENT_SECRET"
+              }
+            }
+          }
+          
+          env {
+            name  = "AUTHORIZATION_SERVER_URL"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "AUTHORIZATION_SERVER_URL"
+              }
+            }
           }
         }
       }
