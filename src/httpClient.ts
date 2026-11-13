@@ -4,17 +4,17 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 
 type TokenResponse = {
-  access_token: string;
-  expires_in: number;
+  accessToken: string;
+  expiresIn: number;
 };
 
 @Injectable()
 export abstract class HttpClient {
   protected readonly logger = new Logger(this.constructor.name);
 
-  private readonly clientId: string = process.env.CLIENT_ID ?? '';
-  private readonly clientSecret: string = process.env.CLIENT_SECRET ?? '';
-  protected readonly authorizationServerUrl: string = process.env.AUTHORIZATION_SERVER_URL ?? '';
+  private readonly clientId: string = `${process.env.CLIENT_ID}`;
+  private readonly clientSecret: string = `${process.env.CLIENT_SECRET}`;
+  protected readonly authorizationServerUrl: string = `${process.env.AUTHORIZATION_SERVER_URL}/auth/token`;
 
   protected abstract readonly serviceUrl: string;
 
@@ -30,24 +30,23 @@ export abstract class HttpClient {
 
     this.logger.debug('Fetching new access token from', this.authorizationServerUrl);
 
+    const credentials = `${this.clientId}:${this.clientSecret}`;
+    const encriptedCredentials = btoa(credentials);
+
     const response = await firstValueFrom(
       this.httpService.post<TokenResponse>(
         this.authorizationServerUrl,
-        new URLSearchParams({
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
-          grant_type: 'client_credentials',
-        }),
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+        {},
+        { headers: { 'Authorization': `Basic ${encriptedCredentials}`, 'Content-Type': 'application/x-www-form-urlencoded' } },
       ),
     );
 
-    const { access_token, expires_in } = response.data;
-    this.cachedToken = access_token;
-    this.tokenExpiry = Date.now() + expires_in * 1000;
+    const { accessToken, expiresIn } = response.data;
+    this.cachedToken = accessToken;
+    this.tokenExpiry = Date.now() + expiresIn * 1000;
 
-    this.logger.debug(`Token acquired, expires in ${expires_in}s`);
-    return access_token;
+    this.logger.debug(`Token acquired, expires in ${expiresIn}s`);
+    return accessToken;
   }
 
   protected async authenticatedRequest<T = any>(
