@@ -35,6 +35,7 @@ Use `DB_HOST=db` with this docker compose file, then run:
 docker compose --env-file .env up -d
 ```
 
+
 ## Swagger / OpenAPI Docs
 
 The project uses Swagger to automatically generate and serve API documentation. Once the application is running, you can explore the endpoints and test requests interactively.
