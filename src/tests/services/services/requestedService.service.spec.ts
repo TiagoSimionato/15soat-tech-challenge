@@ -18,7 +18,6 @@ import { PartsService } from '../../../core/application/parts/parts.service';
 import { ResourceService } from '../../../core/application/resources/resources.service';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServicesService } from '../../../core/application/services/services.service';
-import { StockService } from '../../../core/application/stock/stock.service';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
@@ -111,13 +110,6 @@ describe('RequestedServiceService', () => {
         },
         { provide: ServicesService, useValue: { listOneService: jest.fn() } },
         {
-          provide: StockService,
-          useValue: {
-            listStockByResourceId: jest.fn(),
-            listStockByStockId: jest.fn(),
-          },
-        },
-        {
           provide: PartsService,
           useValue: {
             listOnePartByService: jest.fn(),
@@ -130,7 +122,6 @@ describe('RequestedServiceService', () => {
     serviceItemRepo = module.get(getRepositoryToken(RequestedServicePart));
     resourceService = module.get(ResourceService);
     servicesService = module.get(ServicesService);
-    stockService = module.get(StockService);
     partsService = module.get(PartsService);
   });
   afterEach(async () => jest.clearAllMocks());
