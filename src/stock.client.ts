@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { HttpClient } from './httpClient';
+import { HttpClient } from './core/application/httpClient/http.client';
 
 @Injectable()
 export class StockClient extends HttpClient {
