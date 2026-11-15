@@ -117,6 +117,36 @@ resource "kubernetes_deployment" "app" {
               }
             }
           }
+          
+          env {
+            name  = "STATUS_SERVICE_URL"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "STATUS_SERVICE_URL"
+              }
+            }
+          }
+          
+          env {
+            name  = "PAYMENT_SERVICE_URL"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "PAYMENT_SERVICE_URL"
+              }
+            }
+          }
+          
+          env {
+            name  = "STOCK_SERVICE_URL"
+            value_from {
+              secret_key_ref {
+                name = "secrets-15soat"
+                key  = "STOCK_SERVICE_URL"
+              }
+            }
+          }
         }
       }
     }
