@@ -12,7 +12,7 @@ const mockResourceByServiceDTO: ResourceByServiceDTO = {
 const mockResourcesByService: ResourcesByService = {
   id: 1,
   min_quantity: 5,
-  resource: 'resource',
+  resource_id: 1,
   service: { id: 1 } as any,
 };
 

@@ -66,7 +66,7 @@ describe('serviceOrderClientController', () => {
     amount: 2,
     id: 1,
     requestedService: mockRequestedService,
-    stock: {} as any,
+    stock_id: 1,
   };
 
   const mockResponse = {

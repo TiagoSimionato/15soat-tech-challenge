@@ -7,7 +7,7 @@ import { ResourcesByService } from '../../../frameworks/secondary/resources/reso
 const mockResourcesByService: ResourcesByService = {
   id: 1,
   min_quantity: 5,
-  resource: 'resource',
+  resource_id: 1,
   service: { id: 1 } as any,
 };
 
@@ -63,7 +63,7 @@ describe('ResourceService', () => {
 
       expect(resourceByServiceRepository.create).toHaveBeenCalledWith({
         min_quantity: 5,
-        resource: { id: 1 },
+        resource_id: 1,
         service: { id: 1 },
       });
       expect(resourceByServiceRepository.save).toHaveBeenCalledWith(mockResourcesByService);
