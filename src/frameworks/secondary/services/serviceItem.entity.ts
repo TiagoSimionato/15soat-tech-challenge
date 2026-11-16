@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
-import { Stock } from '../../secondary/stock/stock.entity';
 import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_item' })
@@ -11,9 +10,7 @@ export class ServiceItem {
   @Column()
   amount: number;
 
-  @ManyToOne(() => Stock, stock => stock.serviceItem)
-  @JoinColumn({ name: 'stock_id' })
-  stock: Stock;
+  stock_id: number;
 
   @ManyToOne(() => RequestedService, requestedService => requestedService.serviceItem)
   @JoinColumn({ name: 'requested_service_id' })

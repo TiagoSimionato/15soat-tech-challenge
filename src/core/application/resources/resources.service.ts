@@ -14,7 +14,7 @@ export class ResourceService {
   async createResourceForService(serviceId: number, resourceId: number, min_quantity: number) {
     const resourceByService = this.resourceByServiceRepository.create({
       min_quantity,
-      resource: `${resourceId}`,
+      resource_id: resourceId,
       service: {
         id: serviceId,
       },

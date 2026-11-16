@@ -11,7 +11,7 @@ export class ResourcesByService {
   service: Services;
 
   @Column()
-  resource: string;
+  resource_id: number;
 
   @Column()
   min_quantity: number;
