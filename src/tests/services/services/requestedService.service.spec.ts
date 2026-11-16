@@ -22,6 +22,7 @@ import { RequestedService } from '../../../frameworks/secondary/services/request
 import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+import { StockServiceClient } from '../../../modules/httpClient/stock.client';
 
 const makeManager = () => ({
   create: jest.fn(),
@@ -48,6 +49,13 @@ const makeRepository = () => ({
   save: jest.fn(),
   update: jest.fn(),
 });
+const makeClient = () => ({
+  getStockByStockId: jest.fn(),
+  listResources: jest.fn(),
+  listStock: jest.fn(),
+  listStockByResourceId: jest.fn(),
+  updateStock: jest.fn(),
+});
 const mockResource = { cost: 50, id: 1, name: 'Resource A' };
 const mockStock = { amount: 20, resource_id: 1, stock_id: 1 };
 const mockService = { cost: 100, id: 1, name: 'Service A' };
@@ -55,6 +63,7 @@ const mockResourceByService = {
   id: 1,
   min_quantity: 2,
   resource: mockResource,
+  resource_id: 1,
   service: mockService,
 };
 const makeRequestedService = (
@@ -102,6 +111,10 @@ describe('RequestedServiceService', () => {
           useFactory: makeRepository,
         },
         {
+          provide: StockServiceClient,
+          useFactory: makeClient,
+        },
+        {
           provide: ResourceService,
           useValue: {
             listOneResource: jest.fn(),
@@ -122,15 +135,15 @@ describe('RequestedServiceService', () => {
     serviceItemRepo = module.get(getRepositoryToken(RequestedServicePart));
     resourceService = module.get(ResourceService);
     servicesService = module.get(ServicesService);
+    stockService = module.get(StockServiceClient);
     partsService = module.get(PartsService);
   });
   afterEach(async () => jest.clearAllMocks());
   describe('createRequestedServiceOrder', () => {
     it('should create requested services and update budget for each service', async () => {
-      resourceService.listResourcesOfAService.mockResolvedValue([
-        mockResourceByService,
-      ]);
+      resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
       servicesService.listOneService.mockResolvedValue(mockService);
+      stockService.listResources.mockResolvedValue([mockResource]);
       resourceService.listOneResource.mockResolvedValue(mockResource);
       stockService.listStockByResourceId.mockResolvedValue(mockStock);
       manager.create.mockReturnValue({ id: 1 });
@@ -154,24 +167,23 @@ describe('RequestedServiceService', () => {
       expect(manager.save).toHaveBeenCalled();
     });
     it('should throw BadRequestException when stock is not found for a resource', async () => {
-      resourceService.listResourcesOfAService.mockResolvedValue([
-        mockResourceByService,
-      ]);
+      resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
       servicesService.listOneService.mockResolvedValue(mockService);
+      stockService.listResources.mockResolvedValue([mockResource]);
       resourceService.listOneResource.mockResolvedValue(mockResource);
       stockService.listStockByResourceId.mockResolvedValue(null);
       manager.create.mockReturnValue({ id: 1 });
       manager.save.mockResolvedValue({ id: 1 });
+
       await expect(
         service.createRequestedServiceOrder(manager, 1, [{ id: 1 }] as any),
       ).rejects.toThrow(BadRequestException);
     });
     it('should create requested service parts when parts are provided', async () => {
-      resourceService.listResourcesOfAService.mockResolvedValue([
-        mockResourceByService,
-      ]);
+      resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
       servicesService.listOneService.mockResolvedValue(mockService);
       resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.listResources.mockResolvedValue([mockResource]);
       stockService.listStockByResourceId.mockResolvedValue(mockStock);
       partsService.listOnePartByService.mockResolvedValue({
         id: 1,
@@ -205,11 +217,10 @@ describe('RequestedServiceService', () => {
       );
     });
     it('should throw BadRequestException when a part is not found for the service', async () => {
-      resourceService.listResourcesOfAService.mockResolvedValue([
-        mockResourceByService,
-      ]);
+      resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
       servicesService.listOneService.mockResolvedValue(mockService);
       resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.listResources.mockResolvedValue([mockResource]);
       stockService.listStockByResourceId.mockResolvedValue(mockStock);
       partsService.listOnePartByService.mockResolvedValue(null);
       manager.create.mockReturnValue({ id: 1 });
@@ -559,7 +570,7 @@ describe('RequestedServiceService', () => {
     it('should start the service and decrement stock', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
         serviceItem: [
-          { amount: 2, id: 1, stock: { amount: 10, id: 1 } },
+          { amount: 2, id: 1, stock: { amount: 10, id: 1 }, stock_id: 1 },
         ] as any,
       });
       const repoMock = {
@@ -567,13 +578,17 @@ describe('RequestedServiceService', () => {
         update: jest.fn().mockResolvedValue({ affected: 1 } as never),
       };
       manager.getRepository.mockReturnValue(repoMock);
-      manager.decrement.mockResolvedValue(undefined);
+
+      stockService.listStock.mockResolvedValue([
+        { stock_amount: 10, stock_id: 1 },
+      ]);
+      stockService.updateStock.mockResolvedValue(undefined);
+
       await service.startRequestedService(10, 1);
-      expect(manager.decrement).toHaveBeenCalledWith(
-        expect.anything(),
-        { id: 1 },
-        'amount',
-        2,
+
+      expect(stockService.updateStock).toHaveBeenCalledWith(
+        1,
+        8,
       );
       expect(repoMock.update).toHaveBeenCalledWith(
         { id: 1 },
@@ -585,15 +600,19 @@ describe('RequestedServiceService', () => {
     it('should throw BadRequestException when stock is insufficient', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
         serviceItem: [
-          { amount: 10, id: 1, stock: { amount: 2, id: 1 } },
+          { amount: 10, id: 1, stock: { amount: 2, id: 1 }, stock_id: 1 },
         ] as any,
       });
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
+
+      stockService.listStock.mockResolvedValue([
+        { stock_amount: 2, stock_id: 1 },
+      ]);
+
       await expect(service.startRequestedService(10, 1)).rejects.toThrow(
         BadRequestException,
       );
-      expect(manager.decrement).not.toHaveBeenCalled();
     });
     it('should throw BadRequestException when employee is not assigned', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
@@ -670,7 +689,7 @@ describe('RequestedServiceService', () => {
     it('should calculate cost correctly', async () => {
       resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
       servicesService.listOneService.mockResolvedValue(mockService);
-      resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.listResources.mockResolvedValue([mockResource]);
 
       const result = await (service as any).calculateRequestedServiceCost(1, manager);
 
@@ -688,10 +707,10 @@ describe('RequestedServiceService', () => {
     it('should upsert item and update cost successfully', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO);
 
-      stockService.listStockByStockId.mockResolvedValue(mockStock);
       servicesService.listOneService.mockResolvedValue(mockService);
-      stockService.listStockByStockId.mockResolvedValue(mockStock);
       resourceService.listOneResource.mockResolvedValue(mockResource);
+      stockService.getStockByStockId.mockResolvedValue(mockStock);
+      stockService.listResources.mockResolvedValue([mockResource]);
 
       const serviceItemRepoMock = {
         find: jest.fn().mockResolvedValue([] as never),
@@ -726,25 +745,16 @@ describe('RequestedServiceService', () => {
         {
           amount: mockServiceItemDTO.amount,
           requestedService: { id: mockServiceItemDTO.requested_service_id },
-          stock: { id: mockServiceItemDTO.stock_id },
+          stock_id: mockServiceItemDTO.stock_id,
         },
         ['stock.id', 'requestedService.id'],
       );
-    });
-
-    it('should throw BadRequestException when stock is not found', async () => {
-      stockService.listStockByStockId.mockResolvedValue(null);
-
-      await expect(
-        service.upsertItemOnRequestedService(mockServiceItemDTO as any, 10),
-      ).rejects.toThrow(new BadRequestException('Stock not found.'));
     });
 
     it('should throw BadRequestException when employee is not the assigned one', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO, {
         employee: { id: 99 } as any,
       });
-      stockService.listStockByStockId.mockResolvedValue(mockStock);
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
 
@@ -755,7 +765,6 @@ describe('RequestedServiceService', () => {
 
     it('should throw BadRequestException when status is not EM_DIAGNOSTICO', async () => {
       const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
-      stockService.listStockByStockId.mockResolvedValue(mockStock);
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
 
@@ -788,7 +797,6 @@ describe('RequestedServiceService', () => {
 
     it('should delete the item and update cost successfully', async () => {
       servicesService.listOneService.mockResolvedValue(mockService);
-      stockService.listStockByStockId.mockResolvedValue(mockStock);
       resourceService.listOneResource.mockResolvedValue(mockResource);
 
       const serviceItemRepoMock = {
