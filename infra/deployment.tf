@@ -77,6 +77,11 @@ resource "kubernetes_deployment" "app" {
             name = "DB_PORT"
             value = var.db_port
           }
+
+          env {
+            name = "RMQ_URL"
+            value = var.rmq_url
+          }
           
           env {
             name  = "JWT_SECRET"
