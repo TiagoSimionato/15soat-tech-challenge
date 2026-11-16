@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique }
 import { RequestedService } from './requestedService.entity';
 
 @Entity({ name: 'tb_service_item' })
-@Unique(['stock', 'requestedService'])
+@Unique(['stock_id', 'requestedService'])
 export class ServiceItem {
   @PrimaryGeneratedColumn()
   id: number;
@@ -10,6 +10,7 @@ export class ServiceItem {
   @Column()
   amount: number;
 
+  @Column()
   stock_id: number;
 
   @ManyToOne(() => RequestedService, requestedService => requestedService.serviceItem)

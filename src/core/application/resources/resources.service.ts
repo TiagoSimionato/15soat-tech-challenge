@@ -27,7 +27,6 @@ export class ResourceService {
     const repo = manager ? manager.getRepository(ResourcesByService) : this.resourceByServiceRepository;
 
     return await repo.find({
-      relations: ['resource'],
       where: {
         service: {
           id: serviceId,

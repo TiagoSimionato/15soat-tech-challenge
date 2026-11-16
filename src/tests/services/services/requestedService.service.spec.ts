@@ -228,7 +228,7 @@ describe('RequestedServiceService', () => {
       serviceItemRepo.find.mockResolvedValue(items);
       const result = await service.getServiceItemsByRequestedServiceId(1);
       expect(serviceItemRepo.find).toHaveBeenCalledWith({
-        relations: ['stock', 'requestedService'],
+        relations: ['requestedService'],
         where: { requestedService: { id: 1 } },
       });
       expect(result).toEqual(items);

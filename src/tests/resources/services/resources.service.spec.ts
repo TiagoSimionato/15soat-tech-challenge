@@ -80,7 +80,6 @@ describe('ResourceService', () => {
 
   describe('listResourcesOfAService', () => {
     const expectedQuery = {
-      relations: ['resource'],
       where: { service: { id: 1 } },
     };
 

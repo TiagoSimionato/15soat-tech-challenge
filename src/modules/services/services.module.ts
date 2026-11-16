@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PartsService } from '../../core/application/parts/parts.service';
@@ -15,10 +16,11 @@ import { RequestedServicePart } from '../../frameworks/secondary/services/reques
 import { ServiceItem } from '../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../frameworks/secondary/services/services.entity';
+import { StockServiceClient } from '../httpClient/stock.client';
 
 @Module({
   controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],
-  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService])],
-  providers: [ServicesService, ServiceOrderService, ResourceService, RequestedServiceService, PartsService],
+  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule],
+  providers: [ServicesService, ServiceOrderService, ResourceService, RequestedServiceService, PartsService, StockServiceClient],
 })
 export class ServicesModule {}

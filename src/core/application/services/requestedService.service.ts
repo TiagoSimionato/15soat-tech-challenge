@@ -96,9 +96,7 @@ export class RequestedServiceService {
         requestedService: {
           id: requestedServiceId,
         },
-        stock: {
-          id: stock.stock_id,
-        },
+        stock_id: stock.stock_id,
       });
 
       await manager.save(dbServiceItem);
@@ -131,7 +129,7 @@ export class RequestedServiceService {
   async getServiceItemsByRequestedServiceId(requestedServiceId: number, manager?: EntityManager): Promise<ServiceItem[]> {
     const repo = manager ? manager.getRepository(ServiceItem) : this.serviceItemRepository;
     return await repo.find({
-      relations: ['stock', 'requestedService'],
+      relations: ['requestedService'],
       where: {
         requestedService: {
           id: requestedServiceId,
@@ -143,7 +141,7 @@ export class RequestedServiceService {
   async getRequestedService(id: number, manager?: EntityManager): Promise<RequestedService> {
     const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
     const requestedService = await repo.findOne({
-      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'service', 'serviceOrder', 'serviceOrder.user', 'serviceOrder.requestedServices'],
+      relations: ['employee', 'serviceItem', 'service', 'serviceOrder', 'serviceOrder.user', 'serviceOrder.requestedServices'],
       where: { id },
     });
 
