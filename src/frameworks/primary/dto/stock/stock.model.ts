@@ -1,14 +1,7 @@
-import { IsInt } from 'class-validator';
-
-export class StockDTO {
-  @IsInt() amount: number;
-  @IsInt() resource_id: number;
-}
-
-export class StockResponse {
-  stock_id: number;
-  resource_name: string;
+export type StockResourceResponse = {
   resource_id: number;
-  stock_amount: number;
+  resource_name: string;
   resource_unit: string;
-}
+  stock_amount: number;
+  stock_id: number;
+};

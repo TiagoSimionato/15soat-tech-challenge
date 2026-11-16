@@ -18,7 +18,7 @@ export class Services {
   @OneToMany(() => RequestedService, requestedService => requestedService.service)
   requestedService: RequestedService;
 
-  @OneToMany(() => ResourcesByService, resources => resources.resource)
+  @OneToMany(() => ResourcesByService, resources => resources.resource_id)
   resources: ResourcesByService[];
 
   @OneToMany(() => PartsByService, parts => parts.service)

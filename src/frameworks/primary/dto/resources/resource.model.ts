@@ -1,17 +1,7 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { ResourceType, UnitType } from '../../../../common/enums/resources/resources.enum';
-
-export class ResourceDTO {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsEnum(ResourceType)
-  type: string;
-
-  @IsNumber()
+export type ResourceResponse = {
   cost: number;
-
-  @IsEnum(UnitType)
+  id: number;
+  name: string;
+  type: string;
   unit: string;
-}
+};

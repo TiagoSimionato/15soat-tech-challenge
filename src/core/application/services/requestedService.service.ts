@@ -2,22 +2,21 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
 import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { ResourceResponse } from '../../../frameworks/primary/dto/resources/resource.model';
 import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
 import { PartServiceDTO, ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
-import { StockResponse } from '../../../frameworks/primary/dto/stock/stock.model';
+import { StockResourceResponse } from '../../../frameworks/primary/dto/stock/stock.model';
 import { PartsByService } from '../../../frameworks/secondary/parts/partsByService.entity';
-import { Resource } from '../../../frameworks/secondary/resources/resources.entity';
 import { ResourcesByService } from '../../../frameworks/secondary/resources/resourcesByService.entity';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../../frameworks/secondary/services/services.entity';
-import { Stock } from '../../../frameworks/secondary/stock/stock.entity';
+import { StockServiceClient } from '../../../modules/httpClient/stock.client';
 import { PartsService } from '../parts/parts.service';
 import { ResourceService } from '../resources/resources.service';
 import { ServicesService } from '../services/services.service';
-import { StockService } from '../stock/stock.service';
 
 type RequestedServiceValidations = {
   clientId?: number;
@@ -37,8 +36,8 @@ export class RequestedServiceService {
     private readonly serviceItemRepository: Repository<ServiceItem>,
     private readonly resourceService: ResourceService,
     private readonly servicesService: ServicesService,
-    private readonly stockService: StockService,
     private readonly partsService: PartsService,
+    private readonly stockServiceClient: StockServiceClient,
   ) { }
 
   async createRequestedServiceOrder(manager: EntityManager, serviceOrderId: number, arrServices: ServiceOrderServiceDTO[]) {
@@ -67,14 +66,15 @@ export class RequestedServiceService {
   }
 
   private async calculateRequestedServiceCost(serviceId: number, manager?: EntityManager): Promise<number> {
-    const resources: ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId, manager);
+    const serviceResources: ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId, manager);
     const service: null | Services = await this.servicesService.listOneService(serviceId, manager);
     const serviceCost: number = service ? service.cost : 0;
     let totalCost: number = Number(serviceCost);
+    const resources = await this.stockServiceClient.listResources();
 
-    for (const i in resources) {
-      const resource: null | Resource = await this.resourceService.listOneResource(resources[i].resource.id, manager);
-      totalCost += resource ? Number(resource.cost) * Number(resources[i].min_quantity) : 0;
+    for (const i in serviceResources) {
+      const resource: ResourceResponse | undefined = resources.find(it => it.id === serviceResources[i].resource_id);
+      totalCost += resource ? Number(resource.cost) * Number(serviceResources[i].min_quantity) : 0;
     }
     return totalCost;
   }
@@ -83,11 +83,11 @@ export class RequestedServiceService {
     const resourcesByService: ResourcesByService[] = await this.resourceService.listResourcesOfAService(serviceId, manager);
 
     for (const i in resourcesByService) {
-      const stock: null | StockResponse = await this.stockService.listStockByResourceId(resourcesByService[i].resource.id, manager);
+      const stock: StockResourceResponse | undefined = await this.stockServiceClient.listStockByResourceId(resourcesByService[i].resource_id);
 
       if (!stock) {
         throw new BadRequestException(
-          `Stock not found for resource ${resourcesByService[i].resource.id}`,
+          `Stock not found for resource ${resourcesByService[i].resource_id}`,
         );
       }
 
@@ -96,9 +96,7 @@ export class RequestedServiceService {
         requestedService: {
           id: requestedServiceId,
         },
-        stock: {
-          id: stock.stock_id,
-        },
+        stock_id: stock.stock_id,
       });
 
       await manager.save(dbServiceItem);
@@ -131,7 +129,7 @@ export class RequestedServiceService {
   async getServiceItemsByRequestedServiceId(requestedServiceId: number, manager?: EntityManager): Promise<ServiceItem[]> {
     const repo = manager ? manager.getRepository(ServiceItem) : this.serviceItemRepository;
     return await repo.find({
-      relations: ['stock', 'requestedService'],
+      relations: ['requestedService'],
       where: {
         requestedService: {
           id: requestedServiceId,
@@ -143,7 +141,7 @@ export class RequestedServiceService {
   async getRequestedService(id: number, manager?: EntityManager): Promise<RequestedService> {
     const repo = manager?.getRepository(RequestedService) ?? this.requestedServiceRepository;
     const requestedService = await repo.findOne({
-      relations: ['employee', 'serviceItem', 'serviceItem.stock', 'service', 'serviceOrder', 'serviceOrder.user', 'serviceOrder.requestedServices'],
+      relations: ['employee', 'serviceItem', 'service', 'serviceOrder', 'serviceOrder.user', 'serviceOrder.requestedServices'],
       where: { id },
     });
 
@@ -196,11 +194,12 @@ export class RequestedServiceService {
     const service: null | Services = requestedService ? await this.servicesService.listOneService(requestedService.service.id, manager) : null;
     const serviceCost: number = service ? service.cost : 0;
     let totalCost: number = Number(serviceCost);
+    const resources: null | ResourceResponse[] = await this.stockServiceClient.listResources();
 
     for (const i in itemsOfRequestedService) {
       const item = itemsOfRequestedService[i];
-      const stock: null | StockResponse = await this.stockService.listStockByStockId(item.stock.id, manager);
-      const resource: null | Resource = stock ? await this.resourceService.listOneResource(stock.resource_id, manager) : null;
+      const stock: null | StockResourceResponse = await this.stockServiceClient.getStockByStockId(item.stock_id);
+      const resource: ResourceResponse | undefined = stock ? resources.find(it => it.id === stock.resource_id) : undefined;
       totalCost += resource ? Number(resource.cost) * Number(item.amount) : 0;
     }
 
@@ -224,7 +223,7 @@ export class RequestedServiceService {
 
   async upsertItemOnRequestedService(serviceItem: ServiceItemDTO, employeeId: number) {
     return this.dataSource.transaction(async (manager) => {
-      const stock: null | StockResponse = await this.stockService.listStockByStockId(serviceItem.stock_id, manager);
+      const stock: null | StockResourceResponse = await this.stockServiceClient.getStockByStockId(serviceItem.stock_id);
 
       if (!stock) {
         throw new BadRequestException(
@@ -242,9 +241,7 @@ export class RequestedServiceService {
         requestedService: {
           id: serviceItem.requested_service_id,
         },
-        stock: {
-          id: serviceItem.stock_id,
-        },
+        stock_id: serviceItem.stock_id,
       }, ['stock.id', 'requestedService.id']);
 
       await this.updateRequestedServiceCost(serviceItem.requested_service_id, manager);
@@ -348,17 +345,23 @@ export class RequestedServiceService {
   async startRequestedService(employeeId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
+      const stocks = await this.stockServiceClient.listStock();
 
       this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APROVADO });
       if (requestedService.serviceItem) {
         for (const item of requestedService.serviceItem) {
-          if (!item.stock || Number(item.stock.amount) < Number(item.amount)) {
-            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${item.stock?.amount || 0}`);
+          const stock = stocks.find(it => it.stock_id === item.stock_id);
+          if (!stock || Number(stock.stock_amount) < Number(item.amount)) {
+            throw new BadRequestException(`Not enough stock. Needed: ${item.amount}, Available: ${stock?.stock_amount || 0}`);
           }
         }
 
         for (const item of requestedService.serviceItem) {
-          await manager.decrement(Stock, { id: item.stock.id }, 'amount', item.amount);
+          const stock = stocks.find(it => it.stock_id === item.stock_id);
+          if (stock) {
+            const newStockAmount = stock?.stock_amount - item.amount;
+            await this.stockServiceClient.updateStock(stock?.stock_id, newStockAmount);
+          }
         }
       }
 
