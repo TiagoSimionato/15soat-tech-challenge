@@ -1,5 +1,7 @@
 # 15SOAT Tech Challenge
 
+<img width="1920" height="619" alt="image" src="https://github.com/user-attachments/assets/bdb8b738-777e-4c16-b67d-bdbb4de59932" />
+
 ## Project setup
 
 ```bash
