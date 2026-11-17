@@ -337,7 +337,7 @@ export class RequestedServiceService {
   }
 
   async finishRequestedService(employeeId: number, requestedServiceId: number) {
-    return this.dataSource.transaction(async (manager) => {
+    const serviceOrderId = await this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
       this.validateRequestedService(requestedService, { employeeId });
@@ -345,11 +345,13 @@ export class RequestedServiceService {
       const repo = manager.getRepository(RequestedService);
       await repo.update({ id: requestedServiceId }, { finished_at: new Date() });
 
-      this.statusClient.setStatus({
-        requested_service_number: requestedServiceId,
-        service_order_number: requestedService.serviceOrder.id,
-        status: RequestedServicesStatus.FINALIZADA,
-      });
+      return requestedService.serviceOrder.id;
+    });
+
+    await this.statusClient.setStatus({
+      requested_service_number: requestedServiceId,
+      service_order_number: serviceOrderId,
+      status: RequestedServicesStatus.FINALIZADA,
     });
   }
 

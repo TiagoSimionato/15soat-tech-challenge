@@ -16,12 +16,27 @@ import { RequestedServicePart } from '../../frameworks/secondary/services/reques
 import { ServiceItem } from '../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../frameworks/secondary/services/services.entity';
-import { StatusClient } from '../httpClient/status.client';
+import { STATUS_QUEUE_CLIENT, StatusClient } from '../httpClient/status.client';
 import { StockServiceClient } from '../httpClient/stock.client';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],
-  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule],
+  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule,
+  ClientsModule.registerAsync([
+    {
+      name: STATUS_QUEUE_CLIENT,
+      useFactory: () => ({
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RMQ_URL ?? 'amqp://localhost:5672'],
+          queue: process.env.STATUS_QUEUE_NAME,
+          queueOptions: { durable: true },
+          persistent: true,
+        },
+      }),
+    },
+  ])],
   providers: [ServicesService, ServiceOrderService, ResourceService, RequestedServiceService, PartsService, StockServiceClient, StatusClient],
 })
-export class ServicesModule {}
+export class ServicesModule { }
