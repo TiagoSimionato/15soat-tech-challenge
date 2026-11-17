@@ -11,7 +11,6 @@ type StatusRequest = {
 
 @Injectable()
 export class StatusClient extends HttpClient {
-
   protected serviceUrl: string = `${process.env.STATUS_SERVICE_URL}`;
 
   constructor(http: HttpService) { super(http); }

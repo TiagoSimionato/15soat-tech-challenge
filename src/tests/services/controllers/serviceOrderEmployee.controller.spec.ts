@@ -1,7 +1,7 @@
 import type { Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { RequestedServicesStatus } from '../../../common/enums/services/services.enum';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
 import { ServiceOrderEmployeeController } from '../../../frameworks/primary/controllers/services/serviceOrderEmployee.controller';
@@ -9,6 +9,7 @@ import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/service
 import { DeliverServiceOrderDTO, VehicleArrivedDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+
 jest.mock('@nestjs/axios', () => ({ HttpService: class { } }));
 
 describe('serviceOrderEmployeeController', () => {

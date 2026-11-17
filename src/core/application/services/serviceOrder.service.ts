@@ -5,8 +5,8 @@ import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enu
 import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { User } from '../../../frameworks/secondary/users/users.entity';
-import { RequestedServiceService } from './requestedService.service';
 import { StatusClient } from '../../../modules/httpClient/status.client';
+import { RequestedServiceService } from './requestedService.service';
 
 @Injectable()
 export class ServiceOrderService {
@@ -15,7 +15,7 @@ export class ServiceOrderService {
     private readonly serviceOrderRepository: Repository<ServiceOrder>,
     private readonly dataSource: DataSource,
     private readonly requestedServices: RequestedServiceService,
-    private readonly statusClient: StatusClient
+    private readonly statusClient: StatusClient,
   ) { }
 
   async createServiceOrder(serviceOrder: ServiceOrderDTO): Promise<number> {
@@ -40,7 +40,7 @@ export class ServiceOrderService {
       const serviceOrderId: number = (await manager.save(dbServiceOrder)).id;
       await this.requestedServices.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
 
-      return { serviceOrderId: serviceOrderId };
+      return { serviceOrderId };
     });
 
     if (transaction.serviceOrderId) {
@@ -90,8 +90,9 @@ export class ServiceOrderService {
       const serviceOrder = await this.getOrderDetail(id);
       serviceOrder.vehicle_delivered_at = new Date(vehicleDeliveredAt);
       this.serviceOrderRepository.save(serviceOrder);
-  } catch(error) {
-    throw new BadRequestException('Service order cannot be delivered');
+    }
+    catch (error) {
+      throw new BadRequestException('Service order cannot be delivered');
+    }
   }
-}
 }

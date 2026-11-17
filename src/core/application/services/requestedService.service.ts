@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { DataSource, EntityManager, Repository } from 'typeorm';
+import { RequestedServicesStatus } from '../../../common/enums/services/services.enum';
 import { ResourceResponse } from '../../../frameworks/primary/dto/resources/resource.model';
 import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
 import { PartServiceDTO, ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
@@ -13,11 +13,11 @@ import { RequestedServicePart } from '../../../frameworks/secondary/services/req
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../../frameworks/secondary/services/services.entity';
+import { StatusClient } from '../../../modules/httpClient/status.client';
 import { StockServiceClient } from '../../../modules/httpClient/stock.client';
 import { PartsService } from '../parts/parts.service';
 import { ResourceService } from '../resources/resources.service';
 import { ServicesService } from '../services/services.service';
-import { StatusClient } from '../../../modules/httpClient/status.client';
 
 type RequestedServiceValidations = {
   clientId?: number;
@@ -307,7 +307,7 @@ export class RequestedServiceService {
       const stocks = await this.stockServiceClient.listStock();
 
       this.validateRequestedService(requestedService, { employeeId });
-      
+
       if (requestedService.serviceItem) {
         for (const item of requestedService.serviceItem) {
           const stock = stocks.find(it => it.stock_id === item.stock_id);

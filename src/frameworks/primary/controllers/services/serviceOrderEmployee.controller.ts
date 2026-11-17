@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
 import { RequestedServiceService } from '../../../../core/application/services/requestedService.service';
 import { ServiceOrderService } from '../../../../core/application/services/serviceOrder.service';

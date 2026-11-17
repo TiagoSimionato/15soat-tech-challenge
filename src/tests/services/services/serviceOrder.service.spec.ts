@@ -10,6 +10,7 @@ import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/servic
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { User } from '../../../frameworks/secondary/users/users.entity';
 import { StatusClient } from '../../../modules/httpClient/status.client';
+
 jest.mock('@nestjs/axios', () => ({ HttpService: class { } }));
 
 const mockUser: User = {
