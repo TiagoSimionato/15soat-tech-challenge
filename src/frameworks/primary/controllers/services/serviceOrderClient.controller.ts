@@ -28,16 +28,6 @@ export class ServiceOrderClientController {
     return await this.serviceOrderService.getClientOrders(clientId);
   }
 
-  @Get('/requested/awaiting-approval')
-  @HttpCode(HttpStatus.OK)
-  async getAwaitingApprovalRequestedServices(
-    @CurrentUserId() clientId: number,
-  ) {
-    return await this.requestedServiceS.listUserAwaitingApprovalRequestedServices(
-      clientId,
-    );
-  }
-
   @Get('/requested/:id')
   async getRequestedServiceDetail(@Param('id', ParseIntPipe) requestedServiceId: number, @Res() res: Response) {
     const requestedService: RequestedService = await this.requestedServiceS.getRequestedService(requestedServiceId);

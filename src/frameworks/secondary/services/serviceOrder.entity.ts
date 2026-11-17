@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { ColumnNumericTransformer } from '../../../utils/transformers';
 import { User } from '../../secondary/users/users.entity';
 import { Vehicle } from '../../secondary/vehicle/vehicle.entity';
@@ -9,9 +8,6 @@ import { RequestedService } from './requestedService.entity';
 export class ServiceOrder {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ enum: ServiceOrderStatus, type: 'enum' })
-  status: ServiceOrderStatus;
 
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   budget: number;

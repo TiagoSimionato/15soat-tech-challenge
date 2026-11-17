@@ -1,7 +1,6 @@
 import type { Response } from 'express';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
 import { LegalNature } from '../../../common/enums/users/legalNature.enum';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
 import { ServiceOrderService } from '../../../core/application/services/serviceOrder.service';
@@ -10,6 +9,8 @@ import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/servic
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+
+jest.mock('@nestjs/axios', () => ({ HttpService: class {} }));
 
 describe('serviceOrderClientController', () => {
   let controller: ServiceOrderClientController;
@@ -46,7 +47,6 @@ describe('serviceOrderClientController', () => {
       cost: 0,
       id: 1,
       requestedServices: [] as any,
-      status: ServiceOrderStatus.PENDENTE,
       user: {
         document: '12345678901',
         id: 1,
@@ -59,7 +59,6 @@ describe('serviceOrderClientController', () => {
       vehicle_delivered_at: new Date('2027-01-01T00:00:00Z'),
     },
     started_at: new Date(),
-    status: RequestedServicesStatus.RECEBIDA,
   };
 
   const mockServiceItem: ServiceItem = {
@@ -106,42 +105,6 @@ describe('serviceOrderClientController', () => {
       expect(mockServiceOrderService.createServiceOrder).toHaveBeenCalledTimes(1);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Ordem de serviço criada com sucesso.' });
-    });
-  });
-
-  describe('getAwaitingApprovalRequestedServices', () => {
-    it('should return awaiting approval requested services', async () => {
-      const clientId = 1;
-      const mockServices = [mockRequestedService];
-      mockRequestedServiceService.listUserAwaitingApprovalRequestedServices.mockResolvedValue(mockServices);
-
-      const result = await controller.getAwaitingApprovalRequestedServices(clientId);
-
-      expect(mockRequestedServiceService.listUserAwaitingApprovalRequestedServices).toHaveBeenCalledWith(clientId);
-      expect(result).toEqual(mockServices);
-    });
-
-    it('should return empty array when no services awaiting approval', async () => {
-      const clientId = 99;
-      mockRequestedServiceService.listUserAwaitingApprovalRequestedServices.mockResolvedValue([]);
-
-      const result = await controller.getAwaitingApprovalRequestedServices(clientId);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should return multiple awaiting approval services', async () => {
-      const clientId = 1;
-      const mockServices = [
-        mockRequestedService,
-        { ...mockRequestedService, id: 2 },
-      ];
-      mockRequestedServiceService.listUserAwaitingApprovalRequestedServices.mockResolvedValue(mockServices as any);
-
-      const result = await controller.getAwaitingApprovalRequestedServices(clientId);
-
-      expect(result).toHaveLength(2);
-      expect(result).toEqual(mockServices);
     });
   });
 
@@ -280,7 +243,6 @@ describe('serviceOrderClientController', () => {
 
     it('should have all required methods', () => {
       expect(controller.createServiceOrder).toBeDefined();
-      expect(controller.getAwaitingApprovalRequestedServices).toBeDefined();
       expect(controller.getRequestedServiceDetail).toBeDefined();
       expect(controller.getServiceItemsByRequestedServiceId).toBeDefined();
       expect(controller.getOrderDetail).toBeDefined();

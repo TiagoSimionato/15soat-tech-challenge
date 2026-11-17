@@ -10,10 +10,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {
-  RequestedServicesStatus,
-  ServiceOrderStatus,
-} from '../../../common/enums/services/services.enum';
+import { RequestedServicesStatus } from '../../../common/enums/services/services.enum';
 import { PartsService } from '../../../core/application/parts/parts.service';
 import { ResourceService } from '../../../core/application/resources/resources.service';
 import { RequestedServiceService } from '../../../core/application/services/requestedService.service';
@@ -22,7 +19,10 @@ import { RequestedService } from '../../../frameworks/secondary/services/request
 import { RequestedServicePart } from '../../../frameworks/secondary/services/requestedServicePart.entity';
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+import { StatusClient } from '../../../modules/httpClient/status.client';
 import { StockServiceClient } from '../../../modules/httpClient/stock.client';
+
+jest.mock('@nestjs/axios', () => ({ HttpService: class { } }));
 
 const makeManager = () => ({
   create: jest.fn(),
@@ -56,6 +56,10 @@ const makeClient = () => ({
   listStockByResourceId: jest.fn(),
   updateStock: jest.fn(),
 });
+// O StatusClient só expõe setStatus (o status agora vive em um serviço próprio)
+const makeStatusClient = () => ({
+  setStatus: jest.fn<(payload: unknown) => Promise<void>>().mockResolvedValue(undefined),
+});
 const mockResource = { cost: 50, id: 1, name: 'Resource A' };
 const mockStock = { amount: 20, resource_id: 1, stock_id: 1 };
 const mockService = { cost: 100, id: 1, name: 'Service A' };
@@ -67,7 +71,6 @@ const mockResourceByService = {
   service: mockService,
 };
 const makeRequestedService = (
-  status: RequestedServicesStatus,
   overrides: Partial<RequestedService> = {},
 ): RequestedService =>
   ({
@@ -79,11 +82,9 @@ const makeRequestedService = (
     serviceOrder: {
       id: 1,
       requestedServices: [],
-      status: ServiceOrderStatus.PENDENTE,
       user: { id: 5 },
       vehicle_arrived_at: new Date(),
     },
-    status,
     ...overrides,
   }) as any;
 
@@ -94,8 +95,23 @@ describe('RequestedServiceService', () => {
   let resourceService: any;
   let servicesService: any;
   let stockService: any;
+  let statusService: any;
   let partsService: any;
   let manager: any;
+
+  const expectStatusSet = (
+    requestedServiceId: number,
+    serviceOrderId: number,
+    status: RequestedServicesStatus,
+  ) => {
+    expect(statusService.setStatus).toHaveBeenCalledTimes(1);
+    expect(statusService.setStatus).toHaveBeenCalledWith({
+      requested_service_number: requestedServiceId,
+      service_order_number: serviceOrderId,
+      status,
+    });
+  };
+
   beforeEach(async () => {
     manager = makeManager();
     const module: TestingModule = await Test.createTestingModule({
@@ -113,6 +129,10 @@ describe('RequestedServiceService', () => {
         {
           provide: StockServiceClient,
           useFactory: makeClient,
+        },
+        {
+          provide: StatusClient,
+          useFactory: makeStatusClient,
         },
         {
           provide: ResourceService,
@@ -136,6 +156,7 @@ describe('RequestedServiceService', () => {
     resourceService = module.get(ResourceService);
     servicesService = module.get(ServicesService);
     stockService = module.get(StockServiceClient);
+    statusService = module.get(StatusClient);
     partsService = module.get(PartsService);
   });
   afterEach(async () => jest.clearAllMocks());
@@ -161,7 +182,6 @@ describe('RequestedServiceService', () => {
         expect.objectContaining({
           service: { id: 1 },
           serviceOrder: { id: 1 },
-          status: RequestedServicesStatus.RECEBIDA,
         }),
       );
       expect(manager.save).toHaveBeenCalled();
@@ -259,7 +279,7 @@ describe('RequestedServiceService', () => {
   });
   describe('getRequestedService', () => {
     it('should return a requested service when found', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
+      const rs = makeRequestedService();
       requestedServiceRepo.findOne.mockResolvedValue(rs as never);
       const result = await service.getRequestedService(1);
       expect(result).toEqual(rs);
@@ -271,102 +291,10 @@ describe('RequestedServiceService', () => {
       );
     });
   });
-  describe('getRequestedServices', () => {
-    it('should return requested services filtered by status', async () => {
-      const rs = [makeRequestedService(RequestedServicesStatus.RECEBIDA)];
-      requestedServiceRepo.find.mockResolvedValue(rs as never);
-      const result = await service.getRequestedServices(
-        RequestedServicesStatus.RECEBIDA,
-      );
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { status: RequestedServicesStatus.RECEBIDA },
-        }),
-      );
-      expect(result).toEqual(rs);
-    });
-    it('should return all requested services when no status is provided', async () => {
-      requestedServiceRepo.find.mockResolvedValue([] as never);
-      await service.getRequestedServices();
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { status: undefined } }),
-      );
-    });
-  });
-  describe('getOnGoingRequestedServices', () => {
-    const makeQueryBuilder = (result: RequestedService[]) => {
-      const queryBuilder: any = {
-        addOrderBy: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(result as never),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-      };
-      return queryBuilder;
-    };
 
-    it('should return ongoing requested services ordered by status priority', async () => {
-      const rs = [
-        makeRequestedService(RequestedServicesStatus.EM_EXECUCAO),
-        makeRequestedService(RequestedServicesStatus.RECEBIDA),
-      ];
-      const queryBuilder = makeQueryBuilder(rs);
-      requestedServiceRepo.createQueryBuilder = jest
-        .fn()
-        .mockReturnValue(queryBuilder);
-
-      const result = await service.getOnGoingRequestedServices();
-
-      expect(requestedServiceRepo.createQueryBuilder).toHaveBeenCalledWith(
-        'requestedService',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.service',
-        'service',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.serviceOrder',
-        'serviceOrder',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.serviceItem',
-        'serviceItem',
-      );
-      expect(queryBuilder.where).toHaveBeenCalledWith(
-        'requestedService.status not in (:...statuses)',
-        {
-          statuses: [
-            RequestedServicesStatus.FINALIZADA,
-            RequestedServicesStatus.CANCELADO,
-            RequestedServicesStatus.ENTREGUE,
-          ],
-        },
-      );
-      expect(queryBuilder.orderBy).toHaveBeenCalledWith(
-        expect.stringContaining('CASE "requestedService"."status"'),
-        'ASC',
-      );
-      expect(queryBuilder.addOrderBy).toHaveBeenCalledWith(
-        '"requestedService"."id"',
-        'ASC',
-      );
-      expect(result).toEqual(rs);
-    });
-
-    it('should return empty array when there are no ongoing requested services', async () => {
-      const queryBuilder = makeQueryBuilder([]);
-      requestedServiceRepo.createQueryBuilder = jest
-        .fn()
-        .mockReturnValue(queryBuilder);
-
-      const result = await service.getOnGoingRequestedServices();
-
-      expect(result).toEqual([]);
-    });
-  });
   describe('getEmployeeRequestedServices', () => {
     it('should return requested services for an employee', async () => {
-      const rs = [makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO)];
+      const rs = [makeRequestedService()];
       requestedServiceRepo.find.mockResolvedValue(rs as never);
       const result = await service.getEmployeeRequestedServices(10);
       expect(requestedServiceRepo.find).toHaveBeenCalledWith(
@@ -376,72 +304,78 @@ describe('RequestedServiceService', () => {
     });
   });
   describe('assignRequestedServiceToEmployee', () => {
-    it('should assign employee and update status to EM_DIAGNOSTICO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA, {
+    it('should assign employee and set status EM_DIAGNOSTICO', async () => {
+      const rs = makeRequestedService({
         employee: null as any,
       });
       requestedServiceRepo.findOne.mockResolvedValue(rs as never);
       requestedServiceRepo.update.mockResolvedValue({ affected: 1 } as never);
+
       await service.assignRequestedServiceToEmployee(10, 1);
+
       expect(requestedServiceRepo.update).toHaveBeenCalledWith(
         { id: 1 },
         {
           employee: { id: 10 },
-          status: RequestedServicesStatus.EM_DIAGNOSTICO,
         },
       );
+      expectStatusSet(1, 1, RequestedServicesStatus.EM_DIAGNOSTICO);
     });
     it('should throw BadRequestException when service is already assigned', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
+      const rs = makeRequestedService();
       requestedServiceRepo.findOne.mockResolvedValue(rs as never);
+
       await expect(
         service.assignRequestedServiceToEmployee(10, 1),
       ).rejects.toThrow(
         new BadRequestException('Requested Service already assigned'),
       );
-    });
-    it('should throw BadRequestException when status is not RECEBIDA', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO, {
-        employee: null as any,
-      });
-      requestedServiceRepo.findOne.mockResolvedValue(rs as never);
-      await expect(
-        service.assignRequestedServiceToEmployee(10, 1),
-      ).rejects.toThrow(BadRequestException);
+      expect(requestedServiceRepo.update).not.toHaveBeenCalled();
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
     it('should throw BadRequestException when vehicle has not arrived', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA, {
+      const rs = makeRequestedService({
         employee: null as any,
         serviceOrder: {
           id: 1,
           requestedServices: [],
-          status: ServiceOrderStatus.PENDENTE,
           user: { id: 5 },
           vehicle_arrived_at: null,
         } as any,
       });
       requestedServiceRepo.findOne.mockResolvedValue(rs as never);
+
       await expect(
         service.assignRequestedServiceToEmployee(10, 1),
       ).rejects.toThrow(new BadRequestException('Vehicle have not arrived'));
+      expect(requestedServiceRepo.update).not.toHaveBeenCalled();
+      expect(statusService.setStatus).not.toHaveBeenCalled();
+    });
+    it('should propagate the error when the status service fails', async () => {
+      const rs = makeRequestedService({
+        employee: null as any,
+      });
+      requestedServiceRepo.findOne.mockResolvedValue(rs as never);
+      requestedServiceRepo.update.mockResolvedValue({ affected: 1 } as never);
+      statusService.setStatus.mockRejectedValue(new Error('status service down'));
+
+      await expect(
+        service.assignRequestedServiceToEmployee(10, 1),
+      ).rejects.toThrow('status service down');
     });
   });
   describe('reviewRequestedService', () => {
-    it('should update status to AGUARDANDO_APROVACAO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO);
-      const repoMock = {
-        findOne: jest.fn().mockResolvedValue(rs as never),
-        update: jest.fn().mockResolvedValue({ affected: 1 } as never),
-      };
+    it('should set status AGUARDANDO_APROVACAO when employee is the assigned one', async () => {
+      const rs = makeRequestedService();
+      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
+
       await service.reviewRequestedService(10, 1);
-      expect(repoMock.update).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: RequestedServicesStatus.AGUARDANDO_APROVACAO },
-      );
+
+      expectStatusSet(1, 1, RequestedServicesStatus.AGUARDANDO_APROVACAO);
     });
     it('should throw BadRequestException when employee is not the assigned one', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO, {
+      const rs = makeRequestedService({
         employee: { id: 99 } as any,
       });
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
@@ -449,126 +383,53 @@ describe('RequestedServiceService', () => {
       await expect(service.reviewRequestedService(10, 1)).rejects.toThrow(
         BadRequestException,
       );
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
-    it('should throw BadRequestException when status is not EM_DIAGNOSTICO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
+  });
+
+  describe('approveRequestedService', () => {
+    it('should set status APROVADO when the client owns the service order', async () => {
+      const rs = makeRequestedService();
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
-      await expect(service.reviewRequestedService(10, 1)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-  });
-  describe('listUserAwaitingApprovalRequestedServices', () => {
-    it('should return awaiting approval services for a client', async () => {
-      const rs = [
-        makeRequestedService(RequestedServicesStatus.AGUARDANDO_APROVACAO),
-      ];
-      requestedServiceRepo.find.mockResolvedValue(rs as never);
-      const result = await service.listUserAwaitingApprovalRequestedServices(5);
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            serviceOrder: { user: { id: 5 } },
-            status: RequestedServicesStatus.AGUARDANDO_APROVACAO,
-          },
-        }),
-      );
-      expect(result).toEqual(rs);
-    });
-  });
-  describe('approveRequestedService', () => {
-    it('should approve service and update service order to APROVADO when PENDENTE', async () => {
-      const rs = makeRequestedService(
-        RequestedServicesStatus.AGUARDANDO_APROVACAO,
-      );
-      const requestedServiceRepoMock = {
-        findOne: jest.fn().mockResolvedValue(rs as never),
-        update: jest.fn().mockResolvedValue({ affected: 1 } as never),
-      };
-      const serviceOrderRepoMock = {
-        update: jest.fn().mockResolvedValue({ affected: 1 } as never),
-      };
-      manager.getRepository
-        .mockReturnValueOnce(requestedServiceRepoMock)
-        .mockReturnValueOnce(requestedServiceRepoMock)
-        .mockReturnValueOnce(serviceOrderRepoMock);
+
       await service.approveRequestedService(5, 1);
-      expect(requestedServiceRepoMock.update).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: RequestedServicesStatus.APROVADO },
-      );
-      expect(serviceOrderRepoMock.update).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: ServiceOrderStatus.APROVADO },
-      );
+
+      expectStatusSet(1, 1, RequestedServicesStatus.APROVADO);
     });
     it('should throw BadRequestException when client does not own the service order', async () => {
-      const rs = makeRequestedService(
-        RequestedServicesStatus.AGUARDANDO_APROVACAO,
-      );
+      const rs = makeRequestedService();
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
       await expect(service.approveRequestedService(99, 1)).rejects.toThrow(
         BadRequestException,
       );
-    });
-    it('should throw BadRequestException when status is not AGUARDANDO_APROVACAO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
-      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
-      manager.getRepository.mockReturnValue(repoMock);
-      await expect(service.approveRequestedService(5, 1)).rejects.toThrow(
-        BadRequestException,
-      );
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
   });
   describe('cancelRequestedService', () => {
-    it('should cancel the service and update service order when all services are cancelled', async () => {
-      const rs = makeRequestedService(
-        RequestedServicesStatus.AGUARDANDO_APROVACAO,
-        {
-          serviceOrder: {
-            id: 1,
-            requestedServices: [
-              { status: RequestedServicesStatus.AGUARDANDO_APROVACAO },
-            ],
-            status: ServiceOrderStatus.PENDENTE,
-            user: { id: 5 },
-            vehicle_arrived_at: new Date(),
-          } as any,
-        },
-      );
-      const requestedServiceRepoMock = {
-        findOne: jest.fn().mockResolvedValue(rs as never),
-        update: jest.fn().mockResolvedValue({ affected: 1 } as never),
-      };
-      const serviceOrderRepoMock = {
-        update: jest.fn().mockResolvedValue({ affected: 1 } as never),
-      };
-      manager.getRepository
-        .mockReturnValueOnce(requestedServiceRepoMock)
-        .mockReturnValueOnce(requestedServiceRepoMock)
-        .mockReturnValueOnce(serviceOrderRepoMock);
+    it('should set status CANCELADO when the client owns the service order', async () => {
+      const rs = makeRequestedService();
+      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
+      manager.getRepository.mockReturnValue(repoMock);
+
       await service.cancelRequestedService(5, 1);
-      expect(requestedServiceRepoMock.update).toHaveBeenCalledWith(
-        { id: 1 },
-        { status: RequestedServicesStatus.CANCELADO },
-      );
+
+      expectStatusSet(1, 1, RequestedServicesStatus.CANCELADO);
     });
     it('should throw BadRequestException when client does not own the service order', async () => {
-      const rs = makeRequestedService(
-        RequestedServicesStatus.AGUARDANDO_APROVACAO,
-      );
+      const rs = makeRequestedService();
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
       await expect(service.cancelRequestedService(99, 1)).rejects.toThrow(
         BadRequestException,
       );
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
   });
   describe('startRequestedService', () => {
-    it('should start the service and decrement stock', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
+    it('should start the service, decrement stock and set status EM_EXECUCAO', async () => {
+      const rs = makeRequestedService({
         serviceItem: [
           { amount: 2, id: 1, stock: { amount: 10, id: 1 }, stock_id: 1 },
         ] as any,
@@ -592,13 +453,12 @@ describe('RequestedServiceService', () => {
       );
       expect(repoMock.update).toHaveBeenCalledWith(
         { id: 1 },
-        expect.objectContaining({
-          status: RequestedServicesStatus.EM_EXECUCAO,
-        }),
+        { started_at: expect.any(Date) },
       );
+      expectStatusSet(1, 1, RequestedServicesStatus.EM_EXECUCAO);
     });
     it('should throw BadRequestException when stock is insufficient', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
+      const rs = makeRequestedService({
         serviceItem: [
           { amount: 10, id: 1, stock: { amount: 2, id: 1 }, stock_id: 1 },
         ] as any,
@@ -613,9 +473,11 @@ describe('RequestedServiceService', () => {
       await expect(service.startRequestedService(10, 1)).rejects.toThrow(
         BadRequestException,
       );
+      expect(stockService.updateStock).not.toHaveBeenCalled();
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
     it('should throw BadRequestException when employee is not assigned', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.APROVADO, {
+      const rs = makeRequestedService({
         employee: { id: 99 } as any,
       });
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
@@ -623,32 +485,28 @@ describe('RequestedServiceService', () => {
       await expect(service.startRequestedService(10, 1)).rejects.toThrow(
         BadRequestException,
       );
-    });
-    it('should throw BadRequestException when status is not APROVADO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
-      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
-      manager.getRepository.mockReturnValue(repoMock);
-      await expect(service.startRequestedService(10, 1)).rejects.toThrow(
-        BadRequestException,
-      );
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
   });
   describe('finishRequestedService', () => {
-    it('should finish the service and update status to FINALIZADA', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_EXECUCAO);
+    it('should finish the service and set status FINALIZADA', async () => {
+      const rs = makeRequestedService();
       const repoMock = {
         findOne: jest.fn().mockResolvedValue(rs as never),
         update: jest.fn().mockResolvedValue({ affected: 1 } as never),
       };
       manager.getRepository.mockReturnValue(repoMock);
+
       await service.finishRequestedService(10, 1);
+
       expect(repoMock.update).toHaveBeenCalledWith(
         { id: 1 },
-        expect.objectContaining({ status: RequestedServicesStatus.FINALIZADA }),
+        { finished_at: expect.any(Date) },
       );
+      expectStatusSet(1, 1, RequestedServicesStatus.FINALIZADA);
     });
     it('should throw BadRequestException when employee is not the assigned one', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_EXECUCAO, {
+      const rs = makeRequestedService({
         employee: { id: 99 } as any,
       });
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
@@ -656,35 +514,10 @@ describe('RequestedServiceService', () => {
       await expect(service.finishRequestedService(10, 1)).rejects.toThrow(
         BadRequestException,
       );
-    });
-    it('should throw BadRequestException when status is not EM_EXECUCAO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.APROVADO);
-      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
-      manager.getRepository.mockReturnValue(repoMock);
-      await expect(service.finishRequestedService(10, 1)).rejects.toThrow(
-        BadRequestException,
-      );
+      expect(statusService.setStatus).not.toHaveBeenCalled();
     });
   });
-  describe('getAverageServiceDuration', () => {
-    it('should return average duration and total services analyzed', async () => {
-      const started_at = new Date('2024-01-01T08:00:00Z');
-      const finished_at = new Date('2024-01-01T10:00:00Z');
-      requestedServiceRepo.find.mockResolvedValue([
-        { finished_at, started_at },
-        { finished_at, started_at },
-      ] as never);
-      const result = await service.getAverageServiceDuration(1);
-      expect(result.averageDurationInHours).toBe(2);
-      expect(result.totalServicesAnalyzed).toBe(2);
-    });
-    it('should return 0 hours when no services are found', async () => {
-      requestedServiceRepo.find.mockResolvedValue([] as never);
-      const result = await service.getAverageServiceDuration();
-      expect(result.averageDurationInHours).toBe(0);
-      expect(result.totalServicesAnalyzed).toBe(0);
-    });
-  });
+
   describe('calculateRequestedServiceCost', () => {
     it('should calculate cost correctly', async () => {
       resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);
@@ -705,7 +538,7 @@ describe('RequestedServiceService', () => {
     };
 
     it('should upsert item and update cost successfully', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO);
+      const rs = makeRequestedService();
 
       servicesService.listOneService.mockResolvedValue(mockService);
       resourceService.listOneResource.mockResolvedValue(mockResource);
@@ -751,26 +584,28 @@ describe('RequestedServiceService', () => {
       );
     });
 
-    it('should throw BadRequestException when employee is not the assigned one', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO, {
-        employee: { id: 99 } as any,
-      });
-      const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
-      manager.getRepository.mockReturnValue(repoMock);
+    it('should throw BadRequestException when stock is not found', async () => {
+      stockService.getStockByStockId.mockResolvedValue(null);
 
       await expect(
         service.upsertItemOnRequestedService(mockServiceItemDTO as any, 10),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(new BadRequestException('Stock not found.'));
     });
 
-    it('should throw BadRequestException when status is not EM_DIAGNOSTICO', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.RECEBIDA);
+    it('should throw BadRequestException when employee is not the assigned one', async () => {
+      const rs = makeRequestedService({
+        employee: { id: 99 } as any,
+      });
+      // Sem este mock o teste falharia por "Stock not found.", e não pelo funcionário
+      stockService.getStockByStockId.mockResolvedValue(mockStock);
       const repoMock = { findOne: jest.fn().mockResolvedValue(rs as never) };
       manager.getRepository.mockReturnValue(repoMock);
 
       await expect(
         service.upsertItemOnRequestedService(mockServiceItemDTO as any, 10),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(
+        new BadRequestException('Only the assigned employee can modify this service'),
+      );
     });
   });
 
@@ -786,11 +621,9 @@ describe('RequestedServiceService', () => {
         serviceOrder: {
           id: 1,
           requestedServices: [],
-          status: ServiceOrderStatus.PENDENTE,
           user: { id: 5 },
           vehicle_arrived_at: new Date(),
         },
-        status: RequestedServicesStatus.EM_DIAGNOSTICO,
       },
       stock: { id: 1 },
     };
@@ -873,33 +706,14 @@ describe('RequestedServiceService', () => {
         service.deleteRequestedServiceItem(1, 1, 10),
       ).rejects.toThrow(BadRequestException);
     });
-
-    it('should throw BadRequestException when status is not EM_DIAGNOSTICO', async () => {
-      const itemWithWrongStatus = {
-        ...mockItem,
-        requestedService: {
-          ...mockItem.requestedService,
-          status: RequestedServicesStatus.RECEBIDA,
-        },
-      };
-      const serviceItemRepoMock = {
-        findOne: jest.fn().mockResolvedValue(itemWithWrongStatus as never),
-      };
-      manager.getRepository.mockReturnValue(serviceItemRepoMock);
-
-      await expect(
-        service.deleteRequestedServiceItem(1, 1, 10),
-      ).rejects.toThrow(BadRequestException);
-    });
   });
 
   describe('validateRequestedService (clientId branch)', () => {
     it('should throw BadRequestException when clientId does not match service order user', async () => {
-      const rs = makeRequestedService(RequestedServicesStatus.AGUARDANDO_APROVACAO, {
+      const rs = makeRequestedService({
         serviceOrder: {
           id: 1,
           requestedServices: [],
-          status: ServiceOrderStatus.PENDENTE,
           user: { id: 5 },
           vehicle_arrived_at: new Date(),
         } as any,

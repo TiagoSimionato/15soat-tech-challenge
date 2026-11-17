@@ -16,11 +16,12 @@ import { RequestedServicePart } from '../../frameworks/secondary/services/reques
 import { ServiceItem } from '../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../frameworks/secondary/services/services.entity';
+import { StatusClient } from '../httpClient/status.client';
 import { StockServiceClient } from '../httpClient/stock.client';
 
 @Module({
   controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],
   imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule],
-  providers: [ServicesService, ServiceOrderService, ResourceService, RequestedServiceService, PartsService, StockServiceClient],
+  providers: [ServicesService, ServiceOrderService, ResourceService, RequestedServiceService, PartsService, StockServiceClient, StatusClient],
 })
 export class ServicesModule {}

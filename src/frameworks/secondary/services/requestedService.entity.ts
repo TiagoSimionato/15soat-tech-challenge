@@ -11,9 +11,6 @@ export class RequestedService {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  status: string;
-
   @Column({ nullable: true, type: 'timestamptz' })
   started_at: Date;
 

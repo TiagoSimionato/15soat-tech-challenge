@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, IsNull, Not, Repository } from 'typeorm';
-import { RequestedServicesStatus, ServiceOrderStatus } from '../../../common/enums/services/services.enum';
+import { DataSource, EntityManager, Repository } from 'typeorm';
+import { RequestedServicesStatus } from '../../../common/enums/services/services.enum';
 import { ResourceResponse } from '../../../frameworks/primary/dto/resources/resource.model';
 import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/serviceItem.model';
 import { PartServiceDTO, ServiceOrderServiceDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
@@ -13,6 +13,7 @@ import { RequestedServicePart } from '../../../frameworks/secondary/services/req
 import { ServiceItem } from '../../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../../frameworks/secondary/services/services.entity';
+import { StatusClient } from '../../../modules/httpClient/status.client';
 import { StockServiceClient } from '../../../modules/httpClient/stock.client';
 import { PartsService } from '../parts/parts.service';
 import { ResourceService } from '../resources/resources.service';
@@ -38,6 +39,7 @@ export class RequestedServiceService {
     private readonly servicesService: ServicesService,
     private readonly partsService: PartsService,
     private readonly stockServiceClient: StockServiceClient,
+    private readonly statusClient: StatusClient,
   ) { }
 
   async createRequestedServiceOrder(manager: EntityManager, serviceOrderId: number, arrServices: ServiceOrderServiceDTO[]) {
@@ -51,7 +53,6 @@ export class RequestedServiceService {
         serviceOrder: {
           id: serviceOrderId,
         },
-        status: RequestedServicesStatus.RECEBIDA,
       });
 
       const requestedServiceId: number = (await manager.save(dbReqServiceOrder)).id;
@@ -151,40 +152,8 @@ export class RequestedServiceService {
     return requestedService;
   }
 
-  async getRequestedServices(status?: RequestedServicesStatus): Promise<RequestedService[]> {
-    return await this.requestedServiceRepository.find({ relations: ['service', 'serviceOrder', 'serviceItem', 'employee'], where: { status } });
-  }
-
   async getEmployeeRequestedServices(employeeId?: number): Promise<RequestedService[]> {
     return await this.requestedServiceRepository.find({ relations: ['service', 'serviceOrder', 'serviceItem'], where: { employee: { id: employeeId } } });
-  }
-
-  async getOnGoingRequestedServices(): Promise<RequestedService[]> {
-    return await this.requestedServiceRepository
-      .createQueryBuilder('requestedService')
-      .leftJoinAndSelect('requestedService.service', 'service')
-      .leftJoinAndSelect('requestedService.serviceOrder', 'serviceOrder')
-      .leftJoinAndSelect('requestedService.serviceItem', 'serviceItem')
-      .where('requestedService.status not in (:...statuses)', {
-        statuses: [
-          RequestedServicesStatus.FINALIZADA,
-          RequestedServicesStatus.CANCELADO,
-          RequestedServicesStatus.ENTREGUE,
-        ],
-      })
-      .orderBy(
-        `CASE "requestedService"."status"
-          WHEN 'EM EXECUÇÃO' THEN 1
-          WHEN 'APROVADO' THEN 2
-          WHEN 'AGUARDANDO APROVAÇÃO' THEN 3
-          WHEN 'EM DIAGNÓSTICO' THEN 4
-          WHEN 'RECEBIDA' THEN 5
-        ELSE 6
-        END`,
-        'ASC',
-      )
-      .addOrderBy('"requestedService"."id"', 'ASC')
-      .getMany();
   }
 
   private async updateRequestedServiceCost(requestedServiceId: number, manager: EntityManager) {
@@ -281,24 +250,26 @@ export class RequestedServiceService {
     if (requestedService.employee)
       throw new BadRequestException('Requested Service already assigned');
 
-    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId }, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+    await this.requestedServiceRepository.update({ id: requestedServiceId }, { employee: { id: employeeId } });
+
+    await this.statusClient.setStatus({
+      requested_service_number: requestedServiceId,
+      service_order_number: requestedService.serviceOrder.id,
+      status: RequestedServicesStatus.EM_DIAGNOSTICO,
+    });
   }
 
   async reviewRequestedService(employeeId: number, requestedServiceId: number) {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_DIAGNOSTICO });
+      this.validateRequestedService(requestedService, { employeeId });
 
-      const repo = manager.getRepository(RequestedService);
-      await repo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
-    });
-  }
-
-  async listUserAwaitingApprovalRequestedServices(clientId: number) {
-    return await this.requestedServiceRepository.find({
-      relations: ['service', 'serviceItem'],
-      where: { serviceOrder: { user: { id: clientId } }, status: RequestedServicesStatus.AGUARDANDO_APROVACAO },
+      await this.statusClient.setStatus({
+        requested_service_number: requestedServiceId,
+        service_order_number: requestedService.serviceOrder.id,
+        status: RequestedServicesStatus.AGUARDANDO_APROVACAO,
+      });
     });
   }
 
@@ -306,20 +277,13 @@ export class RequestedServiceService {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+      this.validateRequestedService(requestedService, { clientId });
 
-      const requestedServiceRepo = manager.getRepository(RequestedService);
-      await requestedServiceRepo.update({ id: requestedServiceId }, {
+      this.statusClient.setStatus({
+        requested_service_number: requestedServiceId,
+        service_order_number: requestedService.serviceOrder.id,
         status: RequestedServicesStatus.APROVADO,
       });
-
-      const updateServiceOrderStatus = requestedService.serviceOrder.status === ServiceOrderStatus.PENDENTE;
-      if (updateServiceOrderStatus) {
-        const serviceOrderRepo = manager.getRepository(ServiceOrder);
-        await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
-          status: ServiceOrderStatus.APROVADO,
-        });
-      }
     });
   }
 
@@ -327,18 +291,13 @@ export class RequestedServiceService {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      this.validateRequestedService(requestedService, { clientId, status: RequestedServicesStatus.AGUARDANDO_APROVACAO });
+      this.validateRequestedService(requestedService, { clientId });
 
-      const requestedServiceRepo = manager.getRepository(RequestedService);
-      await requestedServiceRepo.update({ id: requestedServiceId }, { status: RequestedServicesStatus.CANCELADO });
-
-      const updateServiceOrderStatus = requestedService.serviceOrder.requestedServices.every(it => it.status === RequestedServicesStatus.CANCELADO);
-      if (updateServiceOrderStatus) {
-        const serviceOrderRepo = manager.getRepository(ServiceOrder);
-        await serviceOrderRepo.update({ id: requestedService.serviceOrder.id }, {
-          status: ServiceOrderStatus.APROVADO,
-        });
-      }
+      this.statusClient.setStatus({
+        requested_service_number: requestedServiceId,
+        service_order_number: requestedService.serviceOrder.id,
+        status: RequestedServicesStatus.CANCELADO,
+      });
     });
   }
 
@@ -347,7 +306,8 @@ export class RequestedServiceService {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
       const stocks = await this.stockServiceClient.listStock();
 
-      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.APROVADO });
+      this.validateRequestedService(requestedService, { employeeId });
+
       if (requestedService.serviceItem) {
         for (const item of requestedService.serviceItem) {
           const stock = stocks.find(it => it.stock_id === item.stock_id);
@@ -366,7 +326,13 @@ export class RequestedServiceService {
       }
 
       const repo = manager.getRepository(RequestedService);
-      await repo.update({ id: requestedServiceId }, { started_at: new Date(), status: RequestedServicesStatus.EM_EXECUCAO });
+      await repo.update({ id: requestedServiceId }, { started_at: new Date() });
+
+      this.statusClient.setStatus({
+        requested_service_number: requestedServiceId,
+        service_order_number: requestedService.serviceOrder.id,
+        status: RequestedServicesStatus.EM_EXECUCAO,
+      });
     });
   }
 
@@ -374,38 +340,17 @@ export class RequestedServiceService {
     return this.dataSource.transaction(async (manager) => {
       const requestedService = await this.getRequestedService(requestedServiceId, manager);
 
-      this.validateRequestedService(requestedService, { employeeId, status: RequestedServicesStatus.EM_EXECUCAO });
+      this.validateRequestedService(requestedService, { employeeId });
 
       const repo = manager.getRepository(RequestedService);
-      await repo.update({ id: requestedServiceId }, { finished_at: new Date(), status: RequestedServicesStatus.FINALIZADA });
-    });
-  }
+      await repo.update({ id: requestedServiceId }, { finished_at: new Date() });
 
-  async getAverageServiceDuration(serviceId?: number) {
-    const requestedServices = await this.requestedServiceRepository.find({
-      where: [{
-        finished_at: Not(IsNull()),
-        service: { id: serviceId },
-        started_at: Not(IsNull()),
+      this.statusClient.setStatus({
+        requested_service_number: requestedServiceId,
+        service_order_number: requestedService.serviceOrder.id,
         status: RequestedServicesStatus.FINALIZADA,
-      }, {
-        finished_at: Not(IsNull()),
-        service: { id: serviceId },
-        started_at: Not(IsNull()),
-        status: RequestedServicesStatus.ENTREGUE,
-      }],
+      });
     });
-
-    const totalDurationMs = requestedServices.reduce(
-      (acc, rs) => acc + (rs.finished_at.getTime() - rs.started_at.getTime()),
-      0,
-    );
-    const averageDurationInHours = (totalDurationMs / requestedServices.length / 1000 / 60 / 60) || 0;
-
-    return {
-      averageDurationInHours,
-      totalServicesAnalyzed: requestedServices.length,
-    };
   }
 
   private validateRequestedService(requestedService: RequestedService, validations: RequestedServiceValidations) {
@@ -413,8 +358,6 @@ export class RequestedServiceService {
       throw new BadRequestException('Only the assigned employee can modify this service');
     if (validations.clientId && requestedService.serviceOrder.user.id !== validations.clientId)
       throw new BadRequestException('Requested Service not found');
-    if (validations.status && validations.status !== requestedService.status)
-      throw new BadRequestException(`Requested Service has status ${requestedService.status} but needed status ${validations.status}`);
     if (validations.vehicleArrived && !requestedService.serviceOrder.vehicle_arrived_at)
       throw new BadRequestException('Vehicle have not arrived');
   }

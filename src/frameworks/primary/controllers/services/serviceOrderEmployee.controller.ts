@@ -1,7 +1,6 @@
 import type { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { Roles } from '../../../../common/enums/auth/roles.enum';
-import { RequestedServicesStatus } from '../../../../common/enums/services/services.enum';
 import { RequestedServiceService } from '../../../../core/application/services/requestedService.service';
 import { ServiceOrderService } from '../../../../core/application/services/serviceOrder.service';
 import { RequestedService } from '../../../secondary/services/requestedService.entity';
@@ -34,26 +33,6 @@ export class ServiceOrderEmployeeController {
   ) {
     await this.requestedServiceS.upsertItemOnRequestedService(item, employeeId);
     return res.status(201).send({ message: 'Item vínculado ao serviço com sucesso.' });
-  }
-
-  @Get('/requested/ongoing')
-  async getOnGoingRequestedServices() {
-    const requestedServices: RequestedService[] = await this.requestedServiceS.getOnGoingRequestedServices();
-    return requestedServices;
-  }
-
-  @Get('/requested/received')
-  async getReceivedRequestedService() {
-    const requestedServices: RequestedService[] = await this.requestedServiceS.getRequestedServices(RequestedServicesStatus.RECEBIDA);
-    return requestedServices;
-  }
-
-  @Get('/requested/average-duration')
-  async getAverageDuration(
-    @Query('serviceId') serviceId: string | undefined,
-  ) {
-    const id = serviceId ? Number(serviceId) : undefined;
-    return await this.requestedServiceS.getAverageServiceDuration(id);
   }
 
   @Get('/requested/me')
