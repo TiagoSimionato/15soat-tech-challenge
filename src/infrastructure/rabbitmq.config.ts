@@ -16,7 +16,7 @@ export const STATUS_QUEUE_OPTIONS = {
   durable: true,
 };
 
-export async function setupDeadLetterTopology(url: string): Promise<void> {
+export const setupDeadLetterTopology = async (url: string): Promise<void> => {
   const connection = await amqp.connect(url);
   try {
     const channel = await connection.createChannel();
@@ -24,7 +24,8 @@ export async function setupDeadLetterTopology(url: string): Promise<void> {
     await channel.assertQueue(STATUS_DLQ, { durable: true });
     await channel.bindQueue(STATUS_DLQ, STATUS_DLX, STATUS_DLQ_ROUTING_KEY);
     await channel.close();
-  } finally {
+  }
+  finally {
     await connection.close();
   }
-}
+};
