@@ -449,7 +449,7 @@ describe('RequestedServiceService', () => {
 
       expect(stockService.updateStock).toHaveBeenCalledWith(
         1,
-        8,
+        { amount: 8, resource_id: undefined },
       );
       expect(repoMock.update).toHaveBeenCalledWith(
         { id: 1 },
