@@ -17,6 +17,7 @@ import { RequestedServicePart } from '../../frameworks/secondary/services/reques
 import { ServiceItem } from '../../frameworks/secondary/services/serviceItem.entity';
 import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.entity';
 import { Services } from '../../frameworks/secondary/services/services.entity';
+import { STATUS_QUEUE_OPTIONS } from '../../infrastructure/rabbitmq.config';
 import { STATUS_QUEUE_CLIENT, StatusClient } from '../httpClient/status.client';
 import { StockServiceClient } from '../httpClient/stock.client';
 
@@ -29,7 +30,7 @@ import { StockServiceClient } from '../httpClient/stock.client';
         options: {
           persistent: true,
           queue: process.env.STATUS_QUEUE_NAME,
-          queueOptions: { durable: true },
+          queueOptions: STATUS_QUEUE_OPTIONS,
           urls: [process.env.RMQ_URL ?? 'amqp://localhost:5672'],
         },
         transport: Transport.RMQ,
