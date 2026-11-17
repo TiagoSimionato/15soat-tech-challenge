@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PartsService } from '../../core/application/parts/parts.service';
 import { ResourceService } from '../../core/application/resources/resources.service';
@@ -18,22 +19,20 @@ import { ServiceOrder } from '../../frameworks/secondary/services/serviceOrder.e
 import { Services } from '../../frameworks/secondary/services/services.entity';
 import { STATUS_QUEUE_CLIENT, StatusClient } from '../httpClient/status.client';
 import { StockServiceClient } from '../httpClient/stock.client';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   controllers: [ServicesController, ServiceOrderEmployeeController, ServiceOrderClientController],
-  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule,
-  ClientsModule.registerAsync([
+  imports: [TypeOrmModule.forFeature([Services, ServiceOrder, RequestedService, ServiceItem, ResourcesByService, RequestedServicePart, PartsByService]), HttpModule, ClientsModule.registerAsync([
     {
       name: STATUS_QUEUE_CLIENT,
       useFactory: () => ({
-        transport: Transport.RMQ,
         options: {
-          urls: [process.env.RMQ_URL ?? 'amqp://localhost:5672'],
+          persistent: true,
           queue: process.env.STATUS_QUEUE_NAME,
           queueOptions: { durable: true },
-          persistent: true,
+          urls: [process.env.RMQ_URL ?? 'amqp://localhost:5672'],
         },
+        transport: Transport.RMQ,
       }),
     },
   ])],
