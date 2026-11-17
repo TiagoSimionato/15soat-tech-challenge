@@ -1,27 +1,22 @@
-import { HttpService } from '@nestjs/axios';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import { RequestedServicesStatus } from '../../common/enums/services/services.enum';
-import { HttpClient } from './http.client';
 
-type StatusRequest = {
+export const STATUS_QUEUE_CLIENT = 'STATUS_QUEUE_CLIENT';
+export const STATUS_EVENT_PATTERN = 'requested-service.status';
+
+export type SetStatusPayload = {
   requested_service_number?: number;
-  service_order_number?: number;
-  status?: RequestedServicesStatus;
+  service_order_number: number;
+  status: RequestedServicesStatus;
 };
 
 @Injectable()
-export class StatusClient extends HttpClient {
-  protected serviceUrl: string = `${process.env.STATUS_SERVICE_URL}`;
+export class StatusClient {
+  constructor(@Inject(STATUS_QUEUE_CLIENT) private readonly client: ClientProxy) { }
 
-  constructor(http: HttpService) { super(http); }
-
-  async setStatus(body: StatusRequest) {
-    try {
-      const { data } = await super.post(`/status`, body);
-      return data;
-    }
-    catch {
-      throw new HttpException('Upstream service unavailable', HttpStatus.BAD_GATEWAY);
-    }
+  async setStatus(payload: SetStatusPayload): Promise<void> {
+    await lastValueFrom(this.client.emit(STATUS_EVENT_PATTERN, payload));
   }
 }
