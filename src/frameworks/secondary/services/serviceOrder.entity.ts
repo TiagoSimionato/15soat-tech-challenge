@@ -10,9 +10,6 @@ export class ServiceOrder {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ enum: ServiceOrderStatus, type: 'enum' })
-  status: ServiceOrderStatus;
-
   @Column({ transformer: new ColumnNumericTransformer(), type: 'numeric' })
   budget: number;
 

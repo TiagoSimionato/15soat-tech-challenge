@@ -271,99 +271,7 @@ describe('RequestedServiceService', () => {
       );
     });
   });
-  describe('getRequestedServices', () => {
-    it('should return requested services filtered by status', async () => {
-      const rs = [makeRequestedService(RequestedServicesStatus.RECEBIDA)];
-      requestedServiceRepo.find.mockResolvedValue(rs as never);
-      const result = await service.getRequestedServices(
-        RequestedServicesStatus.RECEBIDA,
-      );
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { status: RequestedServicesStatus.RECEBIDA },
-        }),
-      );
-      expect(result).toEqual(rs);
-    });
-    it('should return all requested services when no status is provided', async () => {
-      requestedServiceRepo.find.mockResolvedValue([] as never);
-      await service.getRequestedServices();
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { status: undefined } }),
-      );
-    });
-  });
-  describe('getOnGoingRequestedServices', () => {
-    const makeQueryBuilder = (result: RequestedService[]) => {
-      const queryBuilder: any = {
-        addOrderBy: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(result as never),
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-      };
-      return queryBuilder;
-    };
-
-    it('should return ongoing requested services ordered by status priority', async () => {
-      const rs = [
-        makeRequestedService(RequestedServicesStatus.EM_EXECUCAO),
-        makeRequestedService(RequestedServicesStatus.RECEBIDA),
-      ];
-      const queryBuilder = makeQueryBuilder(rs);
-      requestedServiceRepo.createQueryBuilder = jest
-        .fn()
-        .mockReturnValue(queryBuilder);
-
-      const result = await service.getOnGoingRequestedServices();
-
-      expect(requestedServiceRepo.createQueryBuilder).toHaveBeenCalledWith(
-        'requestedService',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.service',
-        'service',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.serviceOrder',
-        'serviceOrder',
-      );
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
-        'requestedService.serviceItem',
-        'serviceItem',
-      );
-      expect(queryBuilder.where).toHaveBeenCalledWith(
-        'requestedService.status not in (:...statuses)',
-        {
-          statuses: [
-            RequestedServicesStatus.FINALIZADA,
-            RequestedServicesStatus.CANCELADO,
-            RequestedServicesStatus.ENTREGUE,
-          ],
-        },
-      );
-      expect(queryBuilder.orderBy).toHaveBeenCalledWith(
-        expect.stringContaining('CASE "requestedService"."status"'),
-        'ASC',
-      );
-      expect(queryBuilder.addOrderBy).toHaveBeenCalledWith(
-        '"requestedService"."id"',
-        'ASC',
-      );
-      expect(result).toEqual(rs);
-    });
-
-    it('should return empty array when there are no ongoing requested services', async () => {
-      const queryBuilder = makeQueryBuilder([]);
-      requestedServiceRepo.createQueryBuilder = jest
-        .fn()
-        .mockReturnValue(queryBuilder);
-
-      const result = await service.getOnGoingRequestedServices();
-
-      expect(result).toEqual([]);
-    });
-  });
+  
   describe('getEmployeeRequestedServices', () => {
     it('should return requested services for an employee', async () => {
       const rs = [makeRequestedService(RequestedServicesStatus.EM_DIAGNOSTICO)];
@@ -459,24 +367,7 @@ describe('RequestedServiceService', () => {
       );
     });
   });
-  describe('listUserAwaitingApprovalRequestedServices', () => {
-    it('should return awaiting approval services for a client', async () => {
-      const rs = [
-        makeRequestedService(RequestedServicesStatus.AGUARDANDO_APROVACAO),
-      ];
-      requestedServiceRepo.find.mockResolvedValue(rs as never);
-      const result = await service.listUserAwaitingApprovalRequestedServices(5);
-      expect(requestedServiceRepo.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            serviceOrder: { user: { id: 5 } },
-            status: RequestedServicesStatus.AGUARDANDO_APROVACAO,
-          },
-        }),
-      );
-      expect(result).toEqual(rs);
-    });
-  });
+  
   describe('approveRequestedService', () => {
     it('should approve service and update service order to APROVADO when PENDENTE', async () => {
       const rs = makeRequestedService(
@@ -666,25 +557,7 @@ describe('RequestedServiceService', () => {
       );
     });
   });
-  describe('getAverageServiceDuration', () => {
-    it('should return average duration and total services analyzed', async () => {
-      const started_at = new Date('2024-01-01T08:00:00Z');
-      const finished_at = new Date('2024-01-01T10:00:00Z');
-      requestedServiceRepo.find.mockResolvedValue([
-        { finished_at, started_at },
-        { finished_at, started_at },
-      ] as never);
-      const result = await service.getAverageServiceDuration(1);
-      expect(result.averageDurationInHours).toBe(2);
-      expect(result.totalServicesAnalyzed).toBe(2);
-    });
-    it('should return 0 hours when no services are found', async () => {
-      requestedServiceRepo.find.mockResolvedValue([] as never);
-      const result = await service.getAverageServiceDuration();
-      expect(result.averageDurationInHours).toBe(0);
-      expect(result.totalServicesAnalyzed).toBe(0);
-    });
-  });
+  
   describe('calculateRequestedServiceCost', () => {
     it('should calculate cost correctly', async () => {
       resourceService.listResourcesOfAService.mockResolvedValue([mockResourceByService]);

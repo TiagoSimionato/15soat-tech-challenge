@@ -23,9 +23,7 @@ describe('serviceOrderEmployeeController', () => {
     assignRequestedServiceToEmployee: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
     deleteRequestedServiceItem: jest.fn<(requestedServiceId: number, serviceItemId: number, employeeId: number) => Promise<void>>(),
     finishRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
-    getAverageServiceDuration: jest.fn<(serviceId?: number) => Promise<any>>(),
     getEmployeeRequestedServices: jest.fn<(employeeId: number) => Promise<RequestedService[]>>(),
-    getOnGoingRequestedServices: jest.fn<() => Promise<RequestedService[]>>(),
     getRequestedServices: jest.fn<(status: RequestedServicesStatus) => Promise<RequestedService[]>>(),
     reviewRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
     startRequestedService: jest.fn<(employeeId: number, requestedServiceId: number) => Promise<void>>(),
@@ -37,7 +35,6 @@ describe('serviceOrderEmployeeController', () => {
     cost: 0,
     id: 1,
     requestedServices: [],
-    status: ServiceOrderStatus.PENDENTE,
     user: {} as any,
     vehicle: [] as any,
     vehicle_arrived_at: new Date(),
@@ -54,7 +51,6 @@ describe('serviceOrderEmployeeController', () => {
     serviceItem: [] as any,
     serviceOrder: mockServiceOrder,
     started_at: new Date(),
-    status: RequestedServicesStatus.RECEBIDA,
   };
 
   const mockResponse = {
@@ -121,77 +117,6 @@ describe('serviceOrderEmployeeController', () => {
       expect(mockRequestedServiceService.upsertItemOnRequestedService).toHaveBeenCalledWith(serviceItemDTO, employeeId);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Item vínculado ao serviço com sucesso.' });
-    });
-  });
-
-  describe('getOnGoingRequestedServices', () => {
-    it('should return ongoing requested services', async () => {
-      const mockServices = [mockRequestedService];
-      mockRequestedServiceService.getOnGoingRequestedServices.mockResolvedValue(mockServices);
-
-      const result = await controller.getOnGoingRequestedServices();
-
-      expect(mockRequestedServiceService.getOnGoingRequestedServices).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockServices);
-    });
-
-    it('should return empty array when no ongoing services exist', async () => {
-      mockRequestedServiceService.getOnGoingRequestedServices.mockResolvedValue([]);
-
-      const result = await controller.getOnGoingRequestedServices();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('getReceivedRequestedService', () => {
-    it('should return received requested services', async () => {
-      const mockServices = [mockRequestedService];
-      mockRequestedServiceService.getRequestedServices.mockResolvedValue(mockServices);
-
-      const result = await controller.getReceivedRequestedService();
-
-      expect(mockRequestedServiceService.getRequestedServices).toHaveBeenCalledWith(RequestedServicesStatus.RECEBIDA);
-      expect(result).toEqual(mockServices);
-    });
-
-    it('should return empty array when no services exist', async () => {
-      mockRequestedServiceService.getRequestedServices.mockResolvedValue([]);
-
-      const result = await controller.getReceivedRequestedService();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('getAverageDuration', () => {
-    it('should return average duration without serviceId', async () => {
-      const averageData = { averageDuration: 120 };
-      mockRequestedServiceService.getAverageServiceDuration.mockResolvedValue(averageData);
-
-      const result = await controller.getAverageDuration(undefined);
-
-      expect(mockRequestedServiceService.getAverageServiceDuration).toHaveBeenCalledWith(undefined);
-      expect(result).toEqual(averageData);
-    });
-
-    it('should return average duration with serviceId', async () => {
-      const averageData = { averageDuration: 150 };
-      mockRequestedServiceService.getAverageServiceDuration.mockResolvedValue(averageData);
-
-      const result = await controller.getAverageDuration('1');
-
-      expect(mockRequestedServiceService.getAverageServiceDuration).toHaveBeenCalledWith(1);
-      expect(result).toEqual(averageData);
-    });
-
-    it('should handle invalid serviceId string', async () => {
-      const averageData = { averageDuration: 120 };
-      mockRequestedServiceService.getAverageServiceDuration.mockResolvedValue(averageData);
-
-      const result = await controller.getAverageDuration('invalid');
-
-      expect(result).toEqual(averageData);
     });
   });
 
@@ -326,10 +251,7 @@ describe('serviceOrderEmployeeController', () => {
     it('should have all required methods', () => {
       expect(controller.getOrders).toBeDefined();
       expect(controller.upsertItemOnRequestedService).toBeDefined();
-      expect(controller.getReceivedRequestedService).toBeDefined();
-      expect(controller.getAverageDuration).toBeDefined();
       expect(controller.getEmployeeRequestedService).toBeDefined();
-      expect(controller.getOnGoingRequestedServices).toBeDefined();
       expect(controller.deleteRequestedServiceItem).toBeDefined();
       expect(controller.assignRequestedServiceToEmployee).toBeDefined();
       expect(controller.reviewRequestedService).toBeDefined();

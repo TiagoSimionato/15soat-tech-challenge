@@ -6,6 +6,7 @@ import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/servic
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { User } from '../../../frameworks/secondary/users/users.entity';
 import { RequestedServiceService } from './requestedService.service';
+import { StatusClient } from '../../../modules/httpClient/status.client';
 
 @Injectable()
 export class ServiceOrderService {
@@ -14,10 +15,11 @@ export class ServiceOrderService {
     private readonly serviceOrderRepository: Repository<ServiceOrder>,
     private readonly dataSource: DataSource,
     private readonly requestedServices: RequestedServiceService,
+    private readonly statusClient: StatusClient
   ) { }
 
   async createServiceOrder(serviceOrder: ServiceOrderDTO): Promise<number> {
-    return this.dataSource.transaction(async (manager) => {
+    const transaction = await this.dataSource.transaction(async (manager) => {
       const user = await manager.findOne(User, { where: { document: serviceOrder.userDocument } });
 
       if (!user)
@@ -37,8 +39,18 @@ export class ServiceOrderService {
 
       const serviceOrderId: number = (await manager.save(dbServiceOrder)).id;
       await this.requestedServices.createRequestedServiceOrder(manager, serviceOrderId, serviceOrder.services);
-      return serviceOrderId;
+
+      return { serviceOrderId: serviceOrderId };
     });
+
+    if (transaction.serviceOrderId) {
+      await this.statusClient.setStatus({
+        service_order_number: transaction.serviceOrderId,
+        status: RequestedServicesStatus.RECEBIDA,
+      });
+    }
+
+    return transaction.serviceOrderId;
   }
 
   async getOrders(): Promise<null | ServiceOrder[]> {
@@ -69,26 +81,17 @@ export class ServiceOrderService {
   }
 
   async deliverServiceOrder(id: number, vehicleDeliveredAt: string) {
-    const serviceOrder = await this.getOrderDetail(id);
+    try {
+      await this.statusClient.setStatus({
+        service_order_number: id,
+        status: RequestedServicesStatus.ENTREGUE,
+      });
 
-    const allValidStatus = serviceOrder.requestedServices.every(requestedService =>
-      requestedService.status === RequestedServicesStatus.FINALIZADA || requestedService.status === RequestedServicesStatus.CANCELADO);
-    const anyFinished = serviceOrder.requestedServices.some(requestedService =>
-      requestedService.status === RequestedServicesStatus.FINALIZADA);
-    const canDeliver = anyFinished && allValidStatus;
-
-    if (!canDeliver)
-      throw new BadRequestException('Service order cannot be delivered');
-
-    const isEveryServiceCancelled = serviceOrder.requestedServices.every(requestedService => requestedService.status === RequestedServicesStatus.CANCELADO);
-
-    serviceOrder.vehicle_delivered_at = new Date(vehicleDeliveredAt);
-    serviceOrder.status = isEveryServiceCancelled ? ServiceOrderStatus.CANCELADO : ServiceOrderStatus.ENTREGUE;
-    serviceOrder.requestedServices.forEach((requestedService) => {
-      if (requestedService.status === RequestedServicesStatus.FINALIZADA) {
-        requestedService.status = RequestedServicesStatus.ENTREGUE;
-      }
-    });
-    this.serviceOrderRepository.save(serviceOrder);
+      const serviceOrder = await this.getOrderDetail(id);
+      serviceOrder.vehicle_delivered_at = new Date(vehicleDeliveredAt);
+      this.serviceOrderRepository.save(serviceOrder);
+  } catch(error) {
+    throw new BadRequestException('Service order cannot be delivered');
   }
+}
 }
