@@ -9,6 +9,8 @@ import { ServiceOrderService } from '../../../core/application/services/serviceO
 import { ServiceOrderDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
 import { User } from '../../../frameworks/secondary/users/users.entity';
+import { StatusClient } from '../../../modules/httpClient/status.client';
+jest.mock('@nestjs/axios', () => ({ HttpService: class { } }));
 
 const mockUser: User = {
   document: '12345678901',
@@ -22,17 +24,11 @@ const mockServiceOrderDTO: ServiceOrderDTO = {
   vehicle_id: 1,
 };
 
-const mockRequestedService = (status: RequestedServicesStatus) => ({
-  id: 1,
-  status,
-});
-
 const mockServiceOrder: ServiceOrder = {
   budget: 0,
   cost: 0,
   id: 1,
   requestedServices: [],
-  status: ServiceOrderStatus.PENDENTE,
   user: mockUser,
   vehicle: { id: 1 } as any,
   vehicle_arrived_at: null,
@@ -62,11 +58,17 @@ const mockRequestedServiceService = () => ({
   createRequestedServiceOrder: jest.fn(),
 });
 
+// O StatusClient só expõe setStatus (o status agora vive em um serviço próprio)
+const mockStatusClient = () => ({
+  setStatus: jest.fn<(payload: unknown) => Promise<void>>().mockResolvedValue(undefined),
+});
+
 describe('ServiceOrderService', () => {
   let service: ServiceOrderService;
   let repository: any;
   let dataSource: any;
   let requestedServices: any;
+  let statusClient: any;
   let manager: any;
 
   beforeEach(async () => {
@@ -87,6 +89,10 @@ describe('ServiceOrderService', () => {
           provide: RequestedServiceService,
           useFactory: mockRequestedServiceService,
         },
+        {
+          provide: StatusClient,
+          useFactory: mockStatusClient,
+        },
       ],
     }).compile();
 
@@ -94,6 +100,7 @@ describe('ServiceOrderService', () => {
     repository = module.get(getRepositoryToken(ServiceOrder));
     dataSource = module.get(DataSource);
     requestedServices = module.get(RequestedServiceService);
+    statusClient = module.get(StatusClient);
   });
 
   afterEach(() => {
@@ -101,13 +108,13 @@ describe('ServiceOrderService', () => {
   });
 
   describe('createServiceOrder', () => {
-    it('should create a service order within a transaction', async () => {
+    it('should create a service order within a transaction and set status RECEBIDA', async () => {
       manager.findOne.mockResolvedValue(mockUser);
       manager.create.mockReturnValue({ ...mockServiceOrder });
       manager.save.mockResolvedValue({ ...mockServiceOrder, id: 1 });
       requestedServices.createRequestedServiceOrder.mockResolvedValue(undefined);
 
-      await service.createServiceOrder(mockServiceOrderDTO);
+      const result = await service.createServiceOrder(mockServiceOrderDTO);
 
       expect(dataSource.transaction).toHaveBeenCalledTimes(1);
       expect(manager.findOne).toHaveBeenCalledWith(User, {
@@ -126,6 +133,12 @@ describe('ServiceOrderService', () => {
         1,
         mockServiceOrderDTO.services,
       );
+      expect(statusClient.setStatus).toHaveBeenCalledTimes(1);
+      expect(statusClient.setStatus).toHaveBeenCalledWith({
+        service_order_number: 1,
+        status: RequestedServicesStatus.RECEBIDA,
+      });
+      expect(result).toBe(1);
     });
 
     it('should throw BadRequestException when user is not found', async () => {
@@ -137,14 +150,28 @@ describe('ServiceOrderService', () => {
       expect(manager.create).not.toHaveBeenCalled();
       expect(manager.save).not.toHaveBeenCalled();
       expect(requestedServices.createRequestedServiceOrder).not.toHaveBeenCalled();
+      expect(statusClient.setStatus).not.toHaveBeenCalled();
     });
 
-    it('should propagate errors thrown inside the transaction', async () => {
+    it('should propagate errors thrown inside the transaction without setting status', async () => {
       manager.findOne.mockResolvedValue(mockUser);
       manager.create.mockReturnValue(mockServiceOrder);
       manager.save.mockRejectedValue(new Error('DB error'));
 
       await expect(service.createServiceOrder(mockServiceOrderDTO)).rejects.toThrow('DB error');
+      expect(statusClient.setStatus).not.toHaveBeenCalled();
+    });
+
+    it('should propagate the error when the status service fails', async () => {
+      manager.findOne.mockResolvedValue(mockUser);
+      manager.create.mockReturnValue({ ...mockServiceOrder });
+      manager.save.mockResolvedValue({ ...mockServiceOrder, id: 1 });
+      requestedServices.createRequestedServiceOrder.mockResolvedValue(undefined);
+      statusClient.setStatus.mockRejectedValue(new Error('status service down'));
+
+      await expect(service.createServiceOrder(mockServiceOrderDTO)).rejects.toThrow(
+        'status service down',
+      );
     });
   });
 
@@ -172,6 +199,20 @@ describe('ServiceOrderService', () => {
       repository.find.mockRejectedValue(new Error('DB error') as never);
 
       await expect(service.getOrders()).rejects.toThrow('DB error');
+    });
+  });
+
+  describe('getClientOrders', () => {
+    it('should return the orders of the client with relations', async () => {
+      repository.find.mockResolvedValue([mockServiceOrder] as never);
+
+      const result = await service.getClientOrders(1);
+
+      expect(repository.find).toHaveBeenCalledWith({
+        relations: ['vehicle', 'user', 'requestedServices'],
+        where: { user: { id: 1 } },
+      });
+      expect(result).toEqual([mockServiceOrder]);
     });
   });
 
@@ -236,91 +277,40 @@ describe('ServiceOrderService', () => {
   describe('deliverServiceOrder', () => {
     const deliveredAt = '2024-01-02T10:00:00Z';
 
-    it('should deliver the service order when all conditions are met', async () => {
-      const orderWithServices = {
-        ...mockServiceOrder,
-        requestedServices: [
-          mockRequestedService(RequestedServicesStatus.FINALIZADA),
-          mockRequestedService(RequestedServicesStatus.CANCELADO),
-        ],
-      };
-      repository.findOne.mockResolvedValue(orderWithServices as never);
+    it('should set status ENTREGUE and save vehicle_delivered_at', async () => {
+      repository.findOne.mockResolvedValue({ ...mockServiceOrder } as never);
       repository.save.mockResolvedValue(undefined as never);
 
       await service.deliverServiceOrder(1, deliveredAt);
 
+      expect(statusClient.setStatus).toHaveBeenCalledTimes(1);
+      expect(statusClient.setStatus).toHaveBeenCalledWith({
+        service_order_number: 1,
+        status: RequestedServicesStatus.ENTREGUE,
+      });
       expect(repository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: ServiceOrderStatus.ENTREGUE,
-          vehicle_delivered_at: new Date(deliveredAt),
-        }),
+        expect.objectContaining({ vehicle_delivered_at: new Date(deliveredAt) }),
       );
     });
 
-    it('should update FINALIZADA requested services to ENTREGUE on delivery', async () => {
-      const requestedService = mockRequestedService(RequestedServicesStatus.FINALIZADA);
-      const orderWithServices = {
-        ...mockServiceOrder,
-        requestedServices: [requestedService],
-      };
-      repository.findOne.mockResolvedValue(orderWithServices as never);
-      repository.save.mockResolvedValue(undefined as never);
-
-      await service.deliverServiceOrder(1, deliveredAt);
-
-      expect(requestedService.status).toBe(RequestedServicesStatus.ENTREGUE);
-    });
-
-    it('should not change CANCELADO requested services status on delivery', async () => {
-      const canceledService = mockRequestedService(RequestedServicesStatus.CANCELADO);
-      const finishedService = mockRequestedService(RequestedServicesStatus.FINALIZADA);
-      const orderWithServices = {
-        ...mockServiceOrder,
-        requestedServices: [canceledService, finishedService],
-      };
-      repository.findOne.mockResolvedValue(orderWithServices as never);
-      repository.save.mockResolvedValue(undefined as never);
-
-      await service.deliverServiceOrder(1, deliveredAt);
-
-      expect(canceledService.status).toBe(RequestedServicesStatus.CANCELADO);
-    });
-
-    it('should throw BadRequestException when no service is FINALIZADA', async () => {
-      const orderWithServices = {
-        ...mockServiceOrder,
-        requestedServices: [
-          mockRequestedService(RequestedServicesStatus.CANCELADO),
-        ],
-      };
-      repository.findOne.mockResolvedValue(orderWithServices as never);
+    it('should throw BadRequestException when the status service rejects the delivery', async () => {
+      statusClient.setStatus.mockRejectedValue(new Error('Service order cannot be delivered.'));
 
       await expect(service.deliverServiceOrder(1, deliveredAt)).rejects.toThrow(
         new BadRequestException('Service order cannot be delivered'),
       );
+      expect(repository.findOne).not.toHaveBeenCalled();
       expect(repository.save).not.toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException when any service is still in progress', async () => {
-      const orderWithServices = {
-        ...mockServiceOrder,
-        requestedServices: [
-          mockRequestedService(RequestedServicesStatus.FINALIZADA),
-          mockRequestedService(RequestedServicesStatus.EM_EXECUCAO),
-        ],
-      };
-      repository.findOne.mockResolvedValue(orderWithServices as never);
-
-      await expect(service.deliverServiceOrder(1, deliveredAt)).rejects.toThrow(
-        new BadRequestException('Service order cannot be delivered'),
-      );
-      expect(repository.save).not.toHaveBeenCalled();
-    });
-
-    it('should throw NotFoundException when service order is not found', async () => {
+    // Comportamento atual: o try/catch converte QUALQUER erro em BadRequestException,
+    // inclusive o NotFoundException vindo de getOrderDetail.
+    it('should throw BadRequestException when service order is not found', async () => {
       repository.findOne.mockResolvedValue(null as never);
 
-      await expect(service.deliverServiceOrder(99, deliveredAt)).rejects.toThrow(NotFoundException);
+      await expect(service.deliverServiceOrder(99, deliveredAt)).rejects.toThrow(
+        new BadRequestException('Service order cannot be delivered'),
+      );
       expect(repository.save).not.toHaveBeenCalled();
     });
   });

@@ -9,6 +9,7 @@ import { ServiceItemDTO } from '../../../frameworks/primary/dto/services/service
 import { DeliverServiceOrderDTO, VehicleArrivedDTO } from '../../../frameworks/primary/dto/services/serviceOrder.model';
 import { RequestedService } from '../../../frameworks/secondary/services/requestedService.entity';
 import { ServiceOrder } from '../../../frameworks/secondary/services/serviceOrder.entity';
+jest.mock('@nestjs/axios', () => ({ HttpService: class { } }));
 
 describe('serviceOrderEmployeeController', () => {
   let controller: ServiceOrderEmployeeController;
