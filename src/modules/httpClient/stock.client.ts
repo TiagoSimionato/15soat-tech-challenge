@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ResourceResponse } from '../../frameworks/primary/dto/resources/resource.model';
-import { StockResourceResponse } from '../../frameworks/primary/dto/stock/stock.model';
+import { StockResourceResponse, UpdateStock } from '../../frameworks/primary/dto/stock/stock.model';
 import { HttpClient } from './http.client';
 
 @Injectable()
@@ -50,9 +50,9 @@ export class StockServiceClient extends HttpClient {
     }
   }
 
-  async updateStock(id: number, amount: number) {
+  async updateStock(id: number, newStock: UpdateStock) {
     try {
-      await super.put(`/stocks/${id}`, { amount });
+      await super.put(`/stocks/${id}`, newStock);
     }
     catch {
       throw new HttpException('Upstream service unavailable', HttpStatus.BAD_GATEWAY);

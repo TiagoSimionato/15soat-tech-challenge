@@ -320,7 +320,7 @@ export class RequestedServiceService {
           const stock = stocks.find(it => it.stock_id === item.stock_id);
           if (stock) {
             const newStockAmount = stock?.stock_amount - item.amount;
-            await this.stockServiceClient.updateStock(stock?.stock_id, newStockAmount);
+            await this.stockServiceClient.updateStock(stock?.stock_id, { amount: newStockAmount, resource_id: stock.resource_id });
           }
         }
       }
