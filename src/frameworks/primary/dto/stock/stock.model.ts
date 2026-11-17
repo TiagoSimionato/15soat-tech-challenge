@@ -1,3 +1,8 @@
+export type UpdateStock = {
+  amount: number;
+  resource_id: number;
+};
+
 export type StockResourceResponse = {
   resource_id: number;
   resource_name: string;

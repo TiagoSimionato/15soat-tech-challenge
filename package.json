@@ -87,7 +87,9 @@
       "/node_modules/(?!(\\@nestjs\\/axios)/)"
     ],
     "collectCoverageFrom": [
-      "**/*.(controller|service).(t|j)s"
+      "**/*.(controller|service).(t|j)s",
+      "!**/fallback/**",
+      "!**/health/**"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
